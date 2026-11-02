@@ -1,0 +1,259 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/nunito";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Liquid glass over a mint-lit field: translucent sheets, one mint action, and a colour per money flow. */
+@theme inline {
+  --font-sans: ui-rounded, 'SF Pro Rounded', 'Nunito Variable', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-caution: var(--caution);
+  --color-action: var(--action);
+  --color-action-foreground: var(--action-foreground);
+  --color-asset: var(--asset);
+  --color-asset-soft: var(--asset-soft);
+  --color-liability: var(--liability);
+  --color-liability-soft: var(--liability-soft);
+  --color-flow: var(--flow);
+  --color-flow-soft: var(--flow-soft);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.7);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.975 0.018 172);
+  --foreground: oklch(0.24 0.025 200);
+  --card: oklch(1 0 0 / 0.62);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.99 0.01 172);
+  --popover-foreground: var(--foreground);
+  /* Mint #61ffca carries the one action; text on it is ink. */
+  --action: oklch(0.9 0.155 168);
+  --action-foreground: oklch(0.24 0.04 190);
+  --primary: oklch(0.5 0.1 172);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(1 0 0 / 0.55);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.24 0.03 200 / 0.06);
+  --muted-foreground: oklch(0.45 0.025 200);
+  --accent: oklch(1 0 0 / 0.55);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.55 0.19 22);
+  --border: oklch(0.24 0.03 200 / 0.1);
+  --input: oklch(0.24 0.03 200 / 0.3);
+  --ring: oklch(0.6 0.13 170);
+  --gain: oklch(0.52 0.12 165);
+  --loss: oklch(0.56 0.18 22);
+  --caution: oklch(0.64 0.14 70);
+  /* Assets read green, liabilities coral, monthly flow blue. */
+  --asset: oklch(0.52 0.11 168);
+  --asset-soft: oklch(0.9 0.155 168 / 0.32);
+  --liability: oklch(0.56 0.16 25);
+  --liability-soft: oklch(0.8 0.12 25 / 0.28);
+  --flow: oklch(0.52 0.14 255);
+  --flow-soft: oklch(0.82 0.09 250 / 0.32);
+  --glass: oklch(1 0 0 / 0.58);
+  --glass-strong: oklch(1 0 0 / 0.74);
+  --glass-edge: oklch(1 0 0 / 0.85);
+  --glass-shadow: oklch(0.4 0.06 190 / 0.16);
+  --field-1: oklch(0.9 0.155 168 / 0.55);
+  --field-2: oklch(0.86 0.08 230 / 0.5);
+  --field-3: oklch(0.88 0.07 300 / 0.4);
+  --radius: 0.875rem;
+}
+
+.dark {
+  --background: oklch(0.17 0.02 195);
+  --foreground: oklch(0.95 0.015 175);
+  --card: oklch(0.3 0.02 195 / 0.5);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.22 0.02 195);
+  --popover-foreground: var(--foreground);
+  --action: oklch(0.9 0.155 168);
+  --action-foreground: oklch(0.2 0.04 190);
+  --primary: oklch(0.85 0.13 168);
+  --primary-foreground: oklch(0.2 0.03 195);
+  --secondary: oklch(1 0 0 / 0.08);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(1 0 0 / 0.08);
+  --muted-foreground: oklch(0.76 0.02 185);
+  --accent: oklch(1 0 0 / 0.08);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.72 0.15 22);
+  --border: oklch(1 0 0 / 0.12);
+  --input: oklch(1 0 0 / 0.32);
+  --ring: oklch(0.85 0.13 168);
+  --gain: oklch(0.82 0.14 165);
+  --loss: oklch(0.74 0.14 22);
+  --caution: oklch(0.82 0.12 75);
+  --asset: oklch(0.85 0.13 168);
+  --asset-soft: oklch(0.85 0.13 168 / 0.18);
+  --liability: oklch(0.76 0.13 25);
+  --liability-soft: oklch(0.76 0.13 25 / 0.18);
+  --flow: oklch(0.78 0.11 250);
+  --flow-soft: oklch(0.78 0.11 250 / 0.18);
+  --glass: oklch(0.32 0.02 195 / 0.42);
+  --glass-strong: oklch(0.3 0.02 195 / 0.66);
+  --glass-edge: oklch(1 0 0 / 0.14);
+  --glass-shadow: oklch(0 0 0 / 0.45);
+  --field-1: oklch(0.7 0.14 168 / 0.32);
+  --field-2: oklch(0.55 0.12 230 / 0.42);
+  --field-3: oklch(0.5 0.11 300 / 0.36);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+    font-variant-numeric: tabular-nums;
+  }
+  body {
+    @apply text-foreground;
+    min-height: 100dvh;
+    caret-color: var(--ring);
+    /* The lit field the glass refracts: mint, sky and lilac washes over a pale mint ground. */
+    background-color: var(--background);
+  }
+  ::selection {
+    background: oklch(0.9 0.155 168 / 0.45);
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+@layer components {
+  /* A liquid glass sheet: blurred, saturated backdrop, a bright rim and a soft lift. */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-edge);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.55),
+      0 1px 2px var(--glass-shadow),
+      0 18px 40px -22px var(--glass-shadow);
+  }
+  /* Glass tinted by what the sheet holds: assets green, liabilities coral, monthly flow blue. */
+  .glass-asset,
+  .glass-liability,
+  .glass-flow {
+    background: linear-gradient(165deg, var(--tint) 0%, transparent 72%), var(--glass);
+    border-color: color-mix(in oklab, var(--tint-rim) 30%, var(--glass-edge));
+  }
+  .glass-asset { --tint: var(--asset-soft); --tint-rim: var(--asset); }
+  .glass-liability { --tint: var(--liability-soft); --tint-rim: var(--liability); }
+  .glass-flow { --tint: var(--flow-soft); --tint-rim: var(--flow); }
+  /* A floating capsule: thinner fill so content stays legibly blurred beneath it. */
+  .glass-capsule {
+    background: var(--glass);
+    backdrop-filter: blur(22px) saturate(190%);
+    -webkit-backdrop-filter: blur(22px) saturate(190%);
+    border: 1px solid var(--glass-edge);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.5),
+      0 12px 30px -14px var(--glass-shadow);
+  }
+  /* The frosted band behind the pinned desktop verdict fades out on every side but the top. */
+  .pinned-band {
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent), linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent), linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
+    mask-composite: intersect;
+  }
+  .glass-bar {
+    background: var(--glass-strong);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+  .dark .glass {
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.12),
+      0 18px 40px -22px var(--glass-shadow);
+  }
+  /* The mint action: a lit pill with a specular top edge. */
+  .liquid-action {
+    background:
+      linear-gradient(180deg, oklch(1 0 0 / 0.55), oklch(1 0 0 / 0) 55%),
+      var(--action);
+    color: var(--action-foreground);
+    border: 1px solid oklch(1 0 0 / 0.7);
+    box-shadow:
+      inset 0 -1px 0 oklch(0.5 0.1 170 / 0.25),
+      0 10px 24px -10px oklch(0.6 0.15 168 / 0.7);
+  }
+}
+
+/* The lit field the glass refracts, held still behind the page: mint, sky and lilac washes. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(60vmax 50vmax at 8% -6%, var(--field-1), transparent 62%),
+    radial-gradient(50vmax 45vmax at 105% 18%, var(--field-2), transparent 60%),
+    radial-gradient(55vmax 45vmax at 40% 108%, var(--field-3), transparent 62%);
+}
+
+/* Paint the status-bar band so sticky bars never scroll under the system bar. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 40;
+  background: var(--glass-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-bar, .glass-capsule {
+    background: var(--popover);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
