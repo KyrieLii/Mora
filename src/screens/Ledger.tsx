@@ -7,6 +7,7 @@ import { BufferStrip, Verdict } from '@/components/ledger/Verdict'
 import { GROUPS, simulate, summarize, type Snapshot, type StressParams } from '@/engine'
 import { periodName, shortMoney } from '@/lib/format'
 import { useMediaQuery } from '@/lib/hooks'
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -20,11 +21,12 @@ const ACTION_CLASS =
   'liquid-action h-[54px] w-full rounded-full text-[17px] font-bold transition-transform active:scale-[0.98] disabled:opacity-40'
 
 function Records({ history }: { history: Snapshot[] }) {
+  const { t } = useI18n()
   if (history.length === 0) return null
   return (
     <section aria-labelledby="records" className="grid gap-2">
       <h2 id="records" className="text-[17px] font-bold">
-        盘点记录
+        {t.ledger.records}
       </h2>
       <ol className="grid divide-y divide-border/80">
         {[...history].reverse().map((entry, index) => (
@@ -32,7 +34,7 @@ function Records({ history }: { history: Snapshot[] }) {
             <span className="grid">
               <span className="text-[15px] font-semibold">{periodName(entry)}</span>
               <span className="text-[13px] text-muted-foreground">
-                第 {history.length - index} 次 · {entry.date}
+                {t.ledger.recordLine(history.length - index, entry.date)}
               </span>
             </span>
             <span className="text-[15px] font-bold tabular-nums">{shortMoney(summarize(entry).netWorth, entry.baseCurrency)}</span>
@@ -81,6 +83,7 @@ export function Ledger({
   onDraft: (patch: Partial<Snapshot>) => void
   onSave: () => void
 }) {
+  const { t } = useI18n()
   const wide = useMediaQuery('(min-width: 1024px)')
   const [view, setView] = useState<'edit' | 'result'>('edit')
   const [verdictVisible, setVerdictVisible] = useState(true)
@@ -102,7 +105,7 @@ export function Ledger({
     window.scrollTo(0, 0)
   }, [view])
 
-  const header = <Header draft={draft} title="家庭财务盘点" aside={headerAside} onDraft={onDraft} />
+  const header = <Header draft={draft} title={t.appName} aside={headerAside} onDraft={onDraft} />
 
   const notice = savedNote ? (
     <p role="status" className="flex items-center gap-2 rounded-2xl bg-gain/12 px-4 py-3 text-[15px] font-semibold text-gain">
@@ -124,7 +127,7 @@ export function Ledger({
 
   const saveButton = (
     <button type="button" className={ACTION_CLASS} disabled={!hasAmounts} onClick={onSave}>
-      保存本次盘点
+      {t.ledger.save}
     </button>
   )
 
@@ -138,7 +141,7 @@ export function Ledger({
           <Records history={history} />
           {saveButton}
         </main>
-        <aside aria-label="结论与报告" className="grid content-start gap-6 pb-8">
+        <aside aria-label={t.ledger.aside} className="grid content-start gap-6 pb-8">
           {/* Only the verdict stays pinned; the report scrolls with the page. */}
           <div className="glass-bar pinned-band sticky top-0 z-10 -mx-3 -mt-8 px-3 pt-8 pb-4 [&_section]:bg-(--glass-strong)">
             <Verdict draft={draft} previous={previous} params={params} />
@@ -153,7 +156,7 @@ export function Ledger({
     return (
       <div className="mx-auto w-full max-w-xl" style={{ ...sides, paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>
         <main className="grid gap-5 pt-[max(20px,calc(env(safe-area-inset-top,0px)+12px))]">
-          <Header draft={draft} title="盘点结果" back={{ label: '返回修改', onClick: () => setView('edit') }} />
+          <Header draft={draft} title={t.ledger.resultTitle} back={{ label: t.ledger.backToEdit, onClick: () => setView('edit') }} />
           {notice}
           <ResultContent draft={draft} previous={previous} history={history} params={params} />
         </main>
@@ -173,8 +176,8 @@ export function Ledger({
         style={{ top: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}
       >
         <div className="flex items-baseline justify-between text-[15px] font-bold tabular-nums">
-          <span>净资产 {shortMoney(summary.netWorth, draft.baseCurrency)}</span>
-          {hasSpending && <span>{stress.sustainable ? '收入可覆盖支出' : `安全垫 ${stress.capped ? '60+' : stress.monthsCovered} 个月`}</span>}
+          <span>{t.ledger.barNetWorth(shortMoney(summary.netWorth, draft.baseCurrency))}</span>
+          {hasSpending && <span>{stress.sustainable ? t.ledger.barSustainable : t.ledger.barCushion(stress.capped ? '60+' : String(stress.monthsCovered))}</span>}
         </div>
         {hasSpending && <BufferStrip draft={draft} params={params} compact />}
       </div>
@@ -190,7 +193,7 @@ export function Ledger({
 
       <Dock>
         <button type="button" className={ACTION_CLASS} disabled={!hasAmounts} onClick={() => setView('result')}>
-          查看结果
+          {t.ledger.viewResult}
         </button>
       </Dock>
     </div>

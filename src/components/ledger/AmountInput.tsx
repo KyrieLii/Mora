@@ -1,6 +1,7 @@
 import { money, parseAmount, symbol } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { Currency } from '@/engine'
+import { useI18n } from '@/i18n'
 import { useState } from 'react'
 
 /**
@@ -12,7 +13,7 @@ export function AmountInput({
   value,
   currency,
   label,
-  placeholder = '填写金额',
+  placeholder,
   readOnly,
   className,
   onCommit,
@@ -26,6 +27,7 @@ export function AmountInput({
   className?: string
   onCommit: (value: number) => void
 }) {
+  const { t } = useI18n()
   const [draft, setDraft] = useState<string | null>(null)
   const parsed = draft === null ? value : parseAmount(draft)
   const invalid = draft !== null && parsed === null
@@ -40,7 +42,7 @@ export function AmountInput({
         enterKeyHint="next"
         autoComplete="off"
         readOnly={readOnly}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t.common.amountPlaceholder}
         className={cn(
           'w-[7.75rem] rounded-lg sm:w-36 bg-transparent px-2 py-1.5 text-right text-[17px] font-semibold tabular-nums outline-none transition-colors',
           'placeholder:text-[15px] placeholder:font-normal placeholder:text-muted-foreground',
@@ -68,7 +70,7 @@ export function AmountInput({
       />
       {invalid && (
         <span className="px-2 text-xs text-destructive" role="alert">
-          请输入数字，比如 {symbol(currency)}1.5万
+          {t.common.amountError(`${symbol(currency)}${t.common.amountExample}`)}
         </span>
       )}
     </span>

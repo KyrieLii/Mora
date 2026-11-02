@@ -1,4 +1,5 @@
 import type { Snapshot } from '@/engine'
+import { useI18n } from '@/i18n'
 import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronLeft, Moon, Sun } from 'lucide-react'
@@ -29,13 +30,29 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
   )
 }
 
+/** Switches between Chinese and English; shows the language it switches to. */
+export function LanguageToggle() {
+  const { t, toggle } = useI18n()
+  return (
+    <button
+      type="button"
+      aria-label={t.header.switchLanguage}
+      className="glass-capsule relative grid h-9 min-w-9 shrink-0 place-items-center rounded-full px-2.5 text-[13px] font-bold text-foreground transition-transform after:absolute after:-inset-1 active:scale-95"
+      onClick={toggle}
+    >
+      {t.header.otherLanguage}
+    </button>
+  )
+}
+
 export function ThemeToggle() {
+  const { t } = useI18n()
   const { theme, toggle } = useTheme()
   const dark = theme === 'dark'
   return (
     <button
       type="button"
-      aria-label={dark ? '切换到浅色模式' : '切换到深色模式'}
+      aria-label={dark ? t.header.toLight : t.header.toDark}
       className="glass-capsule relative grid size-9 shrink-0 place-items-center rounded-full text-foreground transition-transform after:absolute after:-inset-1 active:scale-95"
       onClick={toggle}
     >
@@ -47,7 +64,8 @@ export function ThemeToggle() {
 /** Title, the review settings beside it, the day/night switch, and a quiet link to the sample. */
 export function Header({ draft, title, back, aside, onDraft }: { draft: Snapshot; title: string; back?: { label: string; onClick: () => void }; aside?: ReactNode; onDraft?: (patch: Partial<Snapshot>) => void }) {
   const [open, setOpen] = useState(false)
-  const summary = `${draft.scope === 'family' ? '家庭' : '个人'} · ${draft.period === 'year' ? '年度' : '季度'} · ${draft.baseCurrency === 'CNY' ? '人民币' : '美元'}`
+  const { t } = useI18n()
+  const summary = t.header.summary(draft.scope, draft.period === 'year', draft.baseCurrency === 'CNY')
 
   return (
     <header className="grid gap-3">
@@ -65,7 +83,7 @@ export function Header({ draft, title, back, aside, onDraft }: { draft: Snapshot
               <button
                 type="button"
                 aria-expanded={open}
-                aria-label={`盘点设置：${summary}`}
+                aria-label={t.header.settings(summary)}
                 className="glass-capsule flex h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold text-foreground"
                 onClick={() => setOpen(!open)}
               >
@@ -80,22 +98,23 @@ export function Header({ draft, title, back, aside, onDraft }: { draft: Snapshot
         </div>
         <div className="flex shrink-0 items-center gap-2 pt-1">
           {aside}
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>
       {open && onDraft && (
         <div className="glass grid gap-3 rounded-[1.375rem] p-4">
-          <Choice label="口径" value={draft.scope} options={[['family', '家庭'], ['personal', '个人']]} onChange={(scope) => onDraft({ scope })} />
-          <Choice label="周期" value={draft.period} options={[['quarter', '季度'], ['year', '年度']]} onChange={(period) => onDraft({ period })} />
-          <Choice label="结果币种" value={draft.baseCurrency} options={[['CNY', '人民币'], ['USD', '美元']]} onChange={(baseCurrency) => onDraft({ baseCurrency })} />
+          <Choice label={t.header.scope} value={draft.scope} options={[['family', t.header.family], ['personal', t.header.personal]]} onChange={(scope) => onDraft({ scope })} />
+          <Choice label={t.header.period} value={draft.period} options={[['quarter', t.header.quarter], ['year', t.header.year]]} onChange={(period) => onDraft({ period })} />
+          <Choice label={t.header.baseCurrency} value={draft.baseCurrency} options={[['CNY', t.common.cny], ['USD', t.common.usd]]} onChange={(baseCurrency) => onDraft({ baseCurrency })} />
           <label className="flex items-center justify-between gap-4">
-            <span className="text-[15px] text-muted-foreground">1 美元兑人民币</span>
+            <span className="text-[15px] text-muted-foreground">{t.header.fxLabel}</span>
             <span className="flex items-center gap-2 text-[13px] text-muted-foreground">
               <input
                 type="number"
                 min="0"
                 step="0.0001"
-                aria-label="美元兑人民币汇率"
+                aria-label={t.header.fxAria}
                 className="glass-capsule h-8 w-24 rounded-full px-3 text-center text-[15px] font-semibold text-foreground tabular-nums outline-none focus:ring-2 focus:ring-ring/40"
                 value={draft.usdCny}
                 onChange={(event) => {

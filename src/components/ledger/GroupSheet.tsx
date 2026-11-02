@@ -1,5 +1,7 @@
 import { Switch } from '@/components/ui/switch'
-import { CATEGORIES, GROUPS, toBase, type Currency, type Group, type Item, type Snapshot } from '@/engine'
+import { CATEGORIES, toBase, type Currency, type Group, type Item, type Snapshot } from '@/engine'
+import { useI18n } from '@/i18n'
+import { displayName } from '@/i18n/names'
 import { money, shortMoney, signed } from '@/lib/format'
 import { categoryIcon, GROUP_ICONS } from '@/lib/icons'
 import { newItem } from '@/lib/store'
@@ -8,15 +10,6 @@ import { ChevronDown, PenLine, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { AmountInput } from './AmountInput'
 import { InfoTip } from './InfoTip'
-
-const HINTS: Record<Group, string> = {
-  cash: '随时能用的钱：存款、余额宝、零钱',
-  investment: '股票、基金等，按当前市值填',
-  fixed: '房子、车位、车，按现在能卖的价格估',
-  restricted: '公积金、养老金，算进净资产，不算进安全垫',
-  other: '借出去的钱、公司股权等',
-  liability: '要还的钱：填剩余本金，展开可填每月还款',
-}
 
 export function Segmented<T extends string>({ value, options, label, onChange }: { value: T; options: [T, string][]; label: string; onChange: (value: T) => void }) {
   return (
@@ -60,16 +53,18 @@ function ItemRow({
   onRemove: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const { t } = useI18n()
   const isLiability = CATEGORIES.find((entry) => entry.id === item.category)?.group === 'liability'
   const categoryDef = CATEGORIES.find((entry) => entry.id === item.category)
-  const category = categoryDef?.label ?? ''
+  const category = t.categories[item.category] ?? categoryDef?.label ?? ''
+  const name = displayName(t, item, 'categories')
   const change = last && last.currency === item.currency && last.amount !== item.amount ? item.amount - last.amount : null
   const Icon = categoryIcon(item.category)
   const note = [
-    !categoryDef?.generic && category !== item.name ? category : '',
-    item.isEstimate ? '估算' : '',
-    item.monthlyPayment ? `月还 ${shortMoney(item.monthlyPayment, item.currency)}` : '',
-    item.monthlyRent ? `月租 ${shortMoney(item.monthlyRent, item.currency)}` : '',
+    !categoryDef?.generic && category !== name ? category : '',
+    item.isEstimate ? t.sheet.estimate : '',
+    item.monthlyPayment ? t.sheet.monthlyPaymentNote(shortMoney(item.monthlyPayment, item.currency)) : '',
+    item.monthlyRent ? t.sheet.monthlyRentNote(shortMoney(item.monthlyRent, item.currency)) : '',
     item.currency !== draft.baseCurrency && item.amount
       ? `≈ ${shortMoney(toBase(item.amount, item.currency, draft.baseCurrency, draft.usdCny), draft.baseCurrency)}`
       : '',
@@ -83,10 +78,10 @@ function ItemRow({
         </span>
         <div className="grid min-w-0 flex-1 pt-0.5">
           <input
-            aria-label="名称"
+            aria-label={t.common.name}
             readOnly={readOnly}
             className="w-full min-w-0 text-ellipsis rounded-lg bg-transparent px-2 py-1 text-[16px] font-medium outline-none transition-colors hover:bg-muted/70 focus:bg-muted focus:ring-2 focus:ring-ring/40"
-            value={item.name}
+            value={name}
             onChange={(event) => onChange({ name: event.target.value })}
             onBlur={(event) => !event.target.value.trim() && onChange({ name: category })}
           />
@@ -97,14 +92,14 @@ function ItemRow({
             id={`amount-${item.id}`}
             value={item.amount}
             currency={item.currency}
-            label={`${item.name}${isLiability ? '剩余本金' : '金额'}`}
+            label={`${name} ${isLiability ? t.sheet.balance : t.sheet.amount}`}
             readOnly={readOnly}
             className={cn(item.isEstimate && 'underline decoration-dotted decoration-2 underline-offset-[5px]')}
             onCommit={(amount) => onChange({ amount })}
           />
           {last && (
             <span className={cn('px-2 text-[13px] tabular-nums', change === null ? 'text-muted-foreground' : 'font-semibold text-foreground')}>
-              {change === null ? '未变' : `较上次 ${signed(change, (value) => shortMoney(value, item.currency))}`}
+              {change === null ? t.common.unchanged : t.common.vsLast(signed(change, (value) => shortMoney(value, item.currency)))}
             </span>
           )}
         </div>
@@ -112,7 +107,7 @@ function ItemRow({
           <button
             type="button"
             aria-expanded={open}
-            aria-label={open ? `收起${item.name}的设置` : `展开${item.name}的设置`}
+            aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
             className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
             onClick={() => setOpen(!open)}
           >
@@ -123,34 +118,34 @@ function ItemRow({
       {open && (
         <div className="mx-2 mb-3 grid gap-3 rounded-[1rem] border border-border p-3 text-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">币种</span>
-            <Segmented value={item.currency} label="币种" options={[['CNY', '人民币'], ['USD', '美元']]} onChange={(currency: Currency) => onChange({ currency })} />
+            <span className="text-muted-foreground">{t.common.currency}</span>
+            <Segmented value={item.currency} label={t.common.currency} options={[['CNY', t.common.cny], ['USD', t.common.usd]]} onChange={(currency: Currency) => onChange({ currency })} />
           </div>
           <label className="flex items-center justify-between gap-3">
             <span className="flex items-center text-muted-foreground">
-              这是估算值
-              <InfoTip label="估算值">拿不准的金额标成估算，安全垫会显示为一个月数范围。</InfoTip>
+              {t.sheet.estimateLabel}
+              <InfoTip label={t.sheet.estimate}>{t.sheet.estimateTip}</InfoTip>
             </span>
             <Switch checked={!!item.isEstimate} onCheckedChange={(checked) => onChange({ isEstimate: checked })} />
           </label>
           {isLiability && (
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">每月还款</span>
-              <AmountInput id={`payment-${item.id}`} value={item.monthlyPayment ?? 0} currency={item.currency} label={`${item.name}每月还款`} onCommit={(monthlyPayment) => onChange({ monthlyPayment })} />
+              <span className="text-muted-foreground">{t.sheet.monthlyPayment}</span>
+              <AmountInput id={`payment-${item.id}`} value={item.monthlyPayment ?? 0} currency={item.currency} label={`${name} ${t.sheet.monthlyPayment}`} onCommit={(monthlyPayment) => onChange({ monthlyPayment })} />
             </div>
           )}
           {isLiability && properties.length > 0 && (
             <label className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">对应房产</span>
+              <span className="text-muted-foreground">{t.sheet.linkedProperty}</span>
               <select
                 className="h-9 max-w-44 rounded-full border bg-popover px-3 text-sm"
                 value={item.linkedAssetId ?? ''}
                 onChange={(event) => onChange({ linkedAssetId: event.target.value || undefined })}
               >
-                <option value="">不关联</option>
+                <option value="">{t.sheet.noLink}</option>
                 {properties.map((property) => (
                   <option key={property.id} value={property.id}>
-                    {property.name}
+                    {displayName(t, property, 'categories')}
                   </option>
                 ))}
               </select>
@@ -158,13 +153,13 @@ function ItemRow({
           )}
           {item.category === 'rental' && (
             <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">每月租金</span>
-              <AmountInput id={`rent-${item.id}`} value={item.monthlyRent ?? 0} currency={item.currency} label={`${item.name}每月租金`} onCommit={(monthlyRent) => onChange({ monthlyRent })} />
+              <span className="text-muted-foreground">{t.sheet.monthlyRent}</span>
+              <AmountInput id={`rent-${item.id}`} value={item.monthlyRent ?? 0} currency={item.currency} label={`${name} ${t.sheet.monthlyRent}`} onCommit={(monthlyRent) => onChange({ monthlyRent })} />
             </div>
           )}
           <button type="button" className="flex items-center gap-1.5 justify-self-start rounded-full px-2 py-1 font-semibold text-destructive hover:bg-destructive/10" onClick={onRemove}>
             <Trash2 className="size-4" />
-            删除这一项
+            {t.common.remove}
           </button>
         </div>
       )}
@@ -187,7 +182,8 @@ export function GroupSheet({
 }) {
   const [adding, setAdding] = useState<false | 'pick' | 'custom'>(false)
   const [customName, setCustomName] = useState('')
-  const label = GROUPS.find((entry) => entry.id === group)!.label
+  const { t } = useI18n()
+  const label = t.groups[group]
   const GroupIcon = GROUP_ICONS[group]
   const tint = group === 'liability' ? { tile: 'bg-liability-soft text-liability', text: 'text-liability', hover: 'hover:bg-liability-soft' } : { tile: 'bg-asset-soft text-asset', text: 'text-asset', hover: 'hover:bg-asset-soft' }
   const categories = CATEGORIES.filter((entry) => entry.group === group)
@@ -203,7 +199,7 @@ export function GroupSheet({
   const genericId = categories.find((entry) => entry.generic)!.id
 
   const add = (category: string, name?: string) => {
-    const item = newItem(category, draft.baseCurrency, name)
+    const item = newItem(category, draft.baseCurrency, name ?? t.categories[category])
     onDraft({ items: [...draft.items, item] })
     setAdding(false)
     setCustomName('')
@@ -216,7 +212,7 @@ export function GroupSheet({
         <h2 id={`group-${group}`} className="flex items-center gap-2 text-[17px] font-bold">
           <GroupIcon className={cn('size-4.5', tint.text)} aria-hidden="true" />
           {label}
-          <InfoTip label={label}>{HINTS[group]}</InfoTip>
+          <InfoTip label={label}>{t.groupHints[group]}</InfoTip>
         </h2>
         <span className={cn('text-[15px] font-bold whitespace-nowrap tabular-nums', tint.text)}>
           {group === 'liability' && total > 0 ? '-' : ''}
@@ -244,7 +240,7 @@ export function GroupSheet({
             <div className="flex flex-wrap gap-2 px-2 py-2">
               {choices.map((category) => (
                 <button key={category.id} type="button" className="glass-capsule h-9 rounded-full px-3.5 text-sm font-semibold transition-colors hover:bg-action hover:text-action-foreground" onClick={() => add(category.id)}>
-                  {category.label}
+                  {t.categories[category.id] ?? category.label}
                 </button>
               ))}
               <button
@@ -253,10 +249,10 @@ export function GroupSheet({
                 onClick={() => setAdding('custom')}
               >
                 <PenLine className="size-4" />
-                自定义
+                {t.common.custom}
               </button>
               <button type="button" className="h-9 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground" onClick={() => setAdding(false)}>
-                取消
+                {t.common.cancel}
               </button>
             </div>
           )}
@@ -270,8 +266,8 @@ export function GroupSheet({
             >
               <input
                 autoFocus
-                aria-label={`自定义${label}的名称`}
-                placeholder="名称，比如 招行理财"
+                aria-label={t.sheet.customName(label)}
+                placeholder={t.sheet.customPlaceholder}
                 enterKeyHint="done"
                 className="glass-capsule h-10 min-w-0 flex-1 rounded-full px-4 text-[16px] outline-none focus:ring-2 focus:ring-ring/40"
                 value={customName}
@@ -279,10 +275,10 @@ export function GroupSheet({
                 onKeyDown={(event) => event.key === 'Escape' && setAdding('pick')}
               />
               <button type="submit" disabled={!customName.trim()} className="h-10 rounded-full bg-foreground px-4 text-sm font-semibold text-background disabled:opacity-35">
-                添加
+                {t.common.add}
               </button>
               <button type="button" className="h-10 rounded-full px-2 text-sm text-muted-foreground hover:text-foreground" onClick={() => setAdding('pick')}>
-                返回
+                {t.common.back}
               </button>
             </form>
           )}
@@ -293,7 +289,7 @@ export function GroupSheet({
               onClick={() => setAdding('pick')}
             >
               <Plus className="size-4.5" />
-              添加{label}
+              {t.sheet.add(label)}
             </button>
           )}
         </div>

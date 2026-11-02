@@ -1,4 +1,5 @@
 import type { Snapshot, StressParams } from '@/engine'
+import { useI18n } from '@/i18n'
 import { emptyState, loadStored, saveStored, today, withDerivedCashflow, type Stored } from '@/lib/store'
 import { Example } from '@/screens/Example'
 import { Ledger } from '@/screens/Ledger'
@@ -12,7 +13,8 @@ export function App() {
   const [state, setState] = useState<Stored>(() => loadStored() ?? emptyState(rateRef.current.usdCny, rateRef.current.fxDate))
   const [params] = useState<Partial<StressParams>>({})
   const [example, setExample] = useState(isExampleHash)
-  const [savedNote, setSavedNote] = useState<string | null>(null)
+  const { t } = useI18n()
+  const [savedCount, setSavedCount] = useState<number | null>(null)
   const { draft, history } = state
   const previous = history.filter((entry) => entry.id !== draft.id).at(-1)
 
@@ -37,7 +39,7 @@ export function App() {
   }, [])
 
   const updateDraft = (patch: Partial<Snapshot>) => {
-    setSavedNote(null)
+    setSavedCount(null)
     setState((current) => ({ ...current, draft: withDerivedCashflow({ ...current.draft, ...patch }) }))
   }
 
@@ -48,7 +50,7 @@ export function App() {
       history: [...current.history, current.draft],
       draft: { ...structuredClone(current.draft), id: crypto.randomUUID(), date: today(), ...rateRef.current },
     }))
-    setSavedNote(`已保存第 ${count} 次盘点。下次打开只需修改变化的数字。`)
+    setSavedCount(count)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -60,12 +62,12 @@ export function App() {
       previous={previous}
       history={history}
       params={params}
-      savedNote={savedNote}
+      savedNote={savedCount === null ? null : t.ledger.saved(savedCount)}
       onDraft={updateDraft}
       onSave={save}
       headerAside={
         <a href="#example" className="rounded-full px-2 py-1.5 text-[13px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-          示例
+          {t.example.link}
         </a>
       }
     />

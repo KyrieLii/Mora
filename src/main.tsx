@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
+import { I18nProvider } from './i18n'
 import { applyTheme, storedTheme } from './lib/theme'
 import './styles.css'
 
@@ -9,6 +10,8 @@ applyTheme(storedTheme() ?? (window.matchMedia('(prefers-color-scheme: dark)').m
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <I18nProvider>
+      <App />
+    </I18nProvider>
   </StrictMode>,
 )

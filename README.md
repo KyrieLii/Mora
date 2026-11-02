@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if the main income stopped.
 
-The interface is in Chinese (家庭财务盘点) and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
+The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
 
 > Prototype. All data stays in your browser's local storage. Nothing is uploaded and no account is needed.
 
@@ -15,7 +15,7 @@ The interface is in Chinese (家庭财务盘点) and is built for urban Chinese 
 - **Safety cushion (安全垫)**: a month-by-month simulation of how long the household can cover its spending after the main income stops, drawing on cash first and then on investments at a stressed market value.
 - **Trend**: net worth across saved reviews, with change since the last review and since about a year ago.
 - **Two currencies**: RMB and USD, converted at a daily rate. Each saved review keeps the rate it used.
-- **Light and dark themes**, with a mobile-first layout: on phones, editing and results are separate pages.
+- **Chinese and English**, light and dark themes, and a mobile-first layout: on phones, editing and results are separate pages.
 
 It is not a budgeting app and does not connect to banks. It is a snapshot you update a few times a year.
 

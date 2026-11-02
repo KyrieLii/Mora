@@ -1,5 +1,7 @@
 import { Switch } from '@/components/ui/switch'
-import { FLOW_CATEGORIES, FREQUENCY_LABELS, monthlyEquivalent, type Currency, type FlowItem, type FlowKind, type Frequency, type Snapshot } from '@/engine'
+import { useI18n } from '@/i18n'
+import { displayName } from '@/i18n/names'
+import { FLOW_CATEGORIES, monthlyEquivalent, type Currency, type FlowItem, type FlowKind, type Frequency, type Snapshot } from '@/engine'
 import { money, shortMoney, signed } from '@/lib/format'
 import { newFlow } from '@/lib/store'
 import { cn } from '@/lib/utils'
@@ -44,19 +46,6 @@ const ICONS: Record<string, LucideIcon> = {
   expenseOther: Receipt,
 }
 
-const COPY: Record<FlowKind, { title: string; tip: string; add: string }> = {
-  income: {
-    title: '现金流',
-    tip: '工资、奖金、补偿等收入。按实际发放频率填写，系统会折算成每月金额；一次性的收入不算进每月合计，只计入安全垫。',
-    add: '添加收入',
-  },
-  expense: {
-    title: '月支出',
-    tip: '房租、车险、订阅等支出，按实际频率填写，系统会折算成每月金额。贷款月供已在负债里填写，这里不用重复。',
-    add: '添加支出',
-  },
-}
-
 function FlowRow({
   flow,
   last,
@@ -71,16 +60,19 @@ function FlowRow({
   onRemove: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const { t } = useI18n()
   const def = FLOW_CATEGORIES.find((entry) => entry.id === flow.category)
+  const label = t.flowCategories[flow.category] ?? def?.label ?? ''
+  const name = displayName(t, flow, 'flowCategories')
   const Icon = ICONS[flow.category] ?? CircleDollarSign
   const isIncome = def?.kind !== 'expense'
   const perMonth = monthlyEquivalent(flow, draft.baseCurrency, draft.usdCny)
   const change = last && last.currency === flow.currency && last.amount !== flow.amount ? flow.amount - last.amount : null
   const note = [
-    !def?.generic && def?.label !== flow.name && flow.frequency !== 'once' ? def?.label : '',
-    FREQUENCY_LABELS[flow.frequency],
-    flow.frequency !== 'monthly' && flow.frequency !== 'once' && flow.amount ? `约 ${shortMoney(perMonth, draft.baseCurrency)}/月` : '',
-    isIncome && flow.continues && flow.frequency !== 'once' ? '持续' : '',
+    !def?.generic && label !== name && flow.frequency !== 'once' ? label : '',
+    t.frequency[flow.frequency],
+    flow.frequency !== 'monthly' && flow.frequency !== 'once' && flow.amount ? t.common.approxPerMonth(shortMoney(perMonth, draft.baseCurrency)) : '',
+    isIncome && flow.continues && flow.frequency !== 'once' ? t.flows.continuing : '',
   ].filter(Boolean)
 
   return (
@@ -91,11 +83,11 @@ function FlowRow({
         </span>
         <div className="grid min-w-0 flex-1 pt-0.5">
           <input
-            aria-label="名称"
+            aria-label={t.common.name}
             className="w-full min-w-0 rounded-lg bg-transparent px-2 py-1 text-[16px] font-medium text-ellipsis outline-none transition-colors hover:bg-muted/70 focus:bg-muted focus:ring-2 focus:ring-ring/40"
-            value={flow.name}
+            value={name}
             onChange={(event) => onChange({ name: event.target.value })}
-            onBlur={(event) => !event.target.value.trim() && onChange({ name: def?.label ?? '' })}
+            onBlur={(event) => !event.target.value.trim() && onChange({ name: label })}
           />
           {/* Each separator rides at the end of the segment before it, so a wrapped line never starts with a dot. */}
           <span className="flex flex-wrap gap-x-1 px-2 text-[13px] text-muted-foreground">
@@ -108,17 +100,17 @@ function FlowRow({
           </span>
         </div>
         <div className="grid justify-items-end">
-          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${flow.name}金额`} className="text-flow" onCommit={(amount) => onChange({ amount })} />
+          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${name} ${t.sheet.amount}`} className="text-flow" onCommit={(amount) => onChange({ amount })} />
           {last && (
             <span className={cn('px-2 text-[13px] tabular-nums', change === null ? 'text-muted-foreground' : 'font-semibold text-foreground')}>
-              {change === null ? '未变' : `较上次 ${signed(change, (value) => shortMoney(value, flow.currency))}`}
+              {change === null ? t.common.unchanged : t.common.vsLast(signed(change, (value) => shortMoney(value, flow.currency)))}
             </span>
           )}
         </div>
         <button
           type="button"
           aria-expanded={open}
-          aria-label={open ? `收起${flow.name}的设置` : `展开${flow.name}的设置`}
+          aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
           className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
           onClick={() => setOpen(!open)}
         >
@@ -128,30 +120,30 @@ function FlowRow({
       {open && (
         <div className="mx-2 mb-3 grid gap-3 rounded-[1rem] border border-border p-3 text-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">频率</span>
+            <span className="text-muted-foreground">{t.flows.frequency}</span>
             <Segmented
               value={flow.frequency}
-              label="频率"
-              options={(isIncome ? ['monthly', 'quarterly', 'annual', 'once'] : ['monthly', 'quarterly', 'annual']).map((id) => [id as Frequency, FREQUENCY_LABELS[id as Frequency]])}
+              label={t.flows.frequency}
+              options={(isIncome ? ['monthly', 'quarterly', 'annual', 'once'] : ['monthly', 'quarterly', 'annual']).map((id) => [id as Frequency, t.frequency[id as Frequency]])}
               onChange={(frequency: Frequency) => onChange({ frequency })}
             />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">币种</span>
-            <Segmented value={flow.currency} label="币种" options={[['CNY', '人民币'], ['USD', '美元']]} onChange={(currency: Currency) => onChange({ currency })} />
+            <span className="text-muted-foreground">{t.common.currency}</span>
+            <Segmented value={flow.currency} label={t.common.currency} options={[['CNY', t.common.cny], ['USD', t.common.usd]]} onChange={(currency: Currency) => onChange({ currency })} />
           </div>
           {isIncome && flow.frequency !== 'once' && (
             <label className="flex items-center justify-between gap-3">
               <span className="flex items-center text-muted-foreground">
-                主要收入中断后仍有
-                <InfoTip label="中断后仍有">比如配偶的工资、租金。打开后，这笔收入标为“持续”，会继续计入安全垫的推算。</InfoTip>
+                {t.flows.continuesLabel}
+                <InfoTip label={t.flows.continuesLabel}>{t.flows.continuesTip}</InfoTip>
               </span>
               <Switch checked={!!flow.continues} onCheckedChange={(checked) => onChange({ continues: checked })} />
             </label>
           )}
           <button type="button" className="flex items-center gap-1.5 justify-self-start rounded-full px-2 py-1 font-semibold text-destructive hover:bg-destructive/10" onClick={onRemove}>
             <Trash2 className="size-4" />
-            删除这一项
+            {t.common.remove}
           </button>
         </div>
       )}
@@ -163,7 +155,8 @@ function FlowRow({
 export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; draft: Snapshot; previous?: Snapshot; onDraft: (patch: Partial<Snapshot>) => void }) {
   const [adding, setAdding] = useState<false | 'pick' | 'custom'>(false)
   const [customName, setCustomName] = useState('')
-  const copy = COPY[kind]
+  const { t } = useI18n()
+  const copy = t.flows[kind]
   const HeadIcon = kind === 'income' ? HandCoins : Receipt
   const categories = FLOW_CATEGORIES.filter((entry) => entry.kind === kind)
   const flows = draft.flows ?? []
@@ -175,7 +168,7 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
   const update = (id: string, patch: Partial<FlowItem>) => onDraft({ flows: flows.map((flow) => (flow.id === id ? { ...flow, ...patch } : flow)) })
 
   const add = (category: string, name?: string) => {
-    const flow = newFlow(category, draft.baseCurrency, name)
+    const flow = newFlow(category, draft.baseCurrency, name ?? t.flowCategories[category])
     onDraft({ flows: [...flows, flow] })
     setAdding(false)
     setCustomName('')
@@ -190,7 +183,7 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
           {copy.title}
           <InfoTip label={copy.title}>{copy.tip}</InfoTip>
         </h2>
-        <span className="text-[15px] font-bold whitespace-nowrap text-flow tabular-nums">{money(perMonth, draft.baseCurrency)}/月</span>
+        <span className="text-[15px] font-bold whitespace-nowrap text-flow tabular-nums">{t.common.perMonth(money(perMonth, draft.baseCurrency))}</span>
       </header>
       <ul className="divide-y divide-border/70">
         {mine.map((flow) => (
@@ -211,7 +204,7 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
               .filter((entry) => !entry.generic)
               .map((category) => (
                 <button key={category.id} type="button" className="glass-capsule h-9 rounded-full px-3.5 text-sm font-semibold transition-colors hover:bg-action hover:text-action-foreground" onClick={() => add(category.id)}>
-                  {category.label}
+                  {t.flowCategories[category.id] ?? category.label}
                 </button>
               ))}
             <button
@@ -220,10 +213,10 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
               onClick={() => setAdding('custom')}
             >
               <PenLine className="size-4" />
-              自定义
+              {t.common.custom}
             </button>
             <button type="button" className="h-9 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground" onClick={() => setAdding(false)}>
-              取消
+              {t.common.cancel}
             </button>
           </div>
         )}
@@ -237,8 +230,8 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
           >
             <input
               autoFocus
-              aria-label={`自定义${kind === 'income' ? '收入' : '支出'}的名称`}
-              placeholder={kind === 'income' ? '名称，比如 稿费' : '名称，比如 宠物开销'}
+              aria-label={copy.customName}
+              placeholder={copy.customPlaceholder}
               enterKeyHint="done"
               className="glass-capsule h-10 min-w-0 flex-1 rounded-full px-4 text-[16px] outline-none focus:ring-2 focus:ring-ring/40"
               value={customName}
@@ -246,10 +239,10 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
               onKeyDown={(event) => event.key === 'Escape' && setAdding('pick')}
             />
             <button type="submit" disabled={!customName.trim()} className="h-10 rounded-full bg-foreground px-4 text-sm font-semibold text-background disabled:opacity-35">
-              添加
+              {t.common.add}
             </button>
             <button type="button" className="h-10 rounded-full px-2 text-sm text-muted-foreground hover:text-foreground" onClick={() => setAdding('pick')}>
-              返回
+              {t.common.back}
             </button>
           </form>
         )}

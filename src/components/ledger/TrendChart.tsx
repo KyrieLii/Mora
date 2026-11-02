@@ -1,4 +1,5 @@
 import { summarize, type Currency, type Snapshot } from '@/engine'
+import { useI18n } from '@/i18n'
 import { percent, shortMoney } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { ArrowDown, ArrowUp } from 'lucide-react'
@@ -25,11 +26,12 @@ function yearAgo(history: Snapshot[], date: string) {
 }
 
 function Change({ title, now, then, date, currency }: { title: string; now: number; then?: number; date?: string; currency: Currency }) {
+  const { t } = useI18n()
   if (then === undefined) {
     return (
       <div className="grid gap-0.5 rounded-2xl border border-border px-3 py-2.5">
         <span className="text-xs text-muted-foreground">{title}</span>
-        <span className="text-[15px] font-semibold text-muted-foreground">暂无对比</span>
+        <span className="text-[15px] font-semibold text-muted-foreground">{t.trend.noComparison}</span>
       </div>
     )
   }
@@ -41,7 +43,7 @@ function Change({ title, now, then, date, currency }: { title: string; now: numb
         {title} · {date}
       </span>
       <span className={cn('flex items-center gap-1 text-[17px] font-bold tabular-nums', delta < 0 && 'text-caution')}>
-        <Arrow className="size-4" aria-label={delta >= 0 ? '增加' : '减少'} />
+        <Arrow className="size-4" aria-label={delta >= 0 ? t.trend.up : t.trend.down} />
         {shortMoney(Math.abs(delta), currency)}
         {then !== 0 && <span className="text-[13px] font-semibold text-muted-foreground">{percent(Math.abs(delta) / Math.abs(then))}</span>}
       </span>
@@ -51,6 +53,7 @@ function Change({ title, now, then, date, currency }: { title: string; now: numb
 
 /** Net worth across every saved review, with the 环比 and 同比 change underneath. */
 export function TrendChart({ draft, previous, history }: { draft: Snapshot; previous?: Snapshot; history: Snapshot[] }) {
+  const { t } = useI18n()
   const currency = draft.baseCurrency
   const points = [...history.filter((entry) => entry.id !== draft.id), draft]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -92,7 +95,7 @@ export function TrendChart({ draft, previous, history }: { draft: Snapshot; prev
   return (
     <div className="grid gap-3">
       {points.length > 1 ? (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" role="img" aria-label={`净资产从 ${shortMoney(values[0]!, currency)} 变为 ${shortMoney(now, currency)}`}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" role="img" aria-label={t.trend.aria(shortMoney(values[0]!, currency), shortMoney(now, currency))}>
           <defs>
             <linearGradient id="trend-fill" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" className="[stop-color:var(--asset)]" stopOpacity="0.28" />
@@ -127,11 +130,11 @@ export function TrendChart({ draft, previous, history }: { draft: Snapshot; prev
           })}
         </svg>
       ) : (
-        <p className="text-[15px] text-muted-foreground">再保存一次盘点后，这里会画出净资产的变化趋势。</p>
+        <p className="text-[15px] text-muted-foreground">{t.trend.needMore}</p>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <Change title="环比" now={now} then={net(previous)} date={previous?.date.slice(2).replaceAll('-', '.')} currency={currency} />
-        <Change title="同比" now={now} then={net(lastYear)} date={lastYear?.date.slice(2).replaceAll('-', '.')} currency={currency} />
+        <Change title={t.trend.mom} now={now} then={net(previous)} date={previous?.date.slice(2).replaceAll('-', '.')} currency={currency} />
+        <Change title={t.trend.yoy} now={now} then={net(lastYear)} date={lastYear?.date.slice(2).replaceAll('-', '.')} currency={currency} />
       </div>
     </div>
   )

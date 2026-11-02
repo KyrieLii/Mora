@@ -1,9 +1,11 @@
 import { Info } from 'lucide-react'
 import { Popover } from 'radix-ui'
+import { useI18n } from '@/i18n'
 import { useRef, useState, type ReactNode } from 'react'
 
 /** A small info icon whose explanation opens on hover, focus or tap, so the page itself stays quiet. */
 export function InfoTip({ label, children }: { label: string; children: ReactNode }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const hovering = useRef(false)
   return (
@@ -12,7 +14,7 @@ export function InfoTip({ label, children }: { label: string; children: ReactNod
       <Popover.Trigger asChild>
         <button
           type="button"
-          aria-label={`${label}的说明`}
+          aria-label={t.common.info(label)}
           className="relative inline-grid size-6 shrink-0 place-items-center rounded-full align-middle text-muted-foreground transition-colors after:absolute after:-inset-2.5 hover:bg-muted hover:text-foreground"
           onPointerEnter={(event) => {
             if (event.pointerType !== 'mouse') return
