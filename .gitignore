@@ -3,5 +3,6 @@ dist
 .DS_Store
 *.local
 .impeccable
+.private
 /PRODUCT.md
 /DESIGN.md

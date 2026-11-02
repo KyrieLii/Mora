@@ -9,8 +9,11 @@ import { periodName, shortMoney } from '@/lib/format'
 import { useMediaQuery } from '@/lib/hooks'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Check, ChevronRight, ScanText } from 'lucide-react'
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
+
+// The provider SDK is only needed once someone opens import, so it stays out of the first load.
+const ImportDialog = lazy(() => import('@/components/ledger/ImportDialog').then((module) => ({ default: module.ImportDialog })))
 
 export const sides = {
   paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
@@ -88,6 +91,8 @@ export function Ledger({
   const [view, setView] = useState<'edit' | 'result'>('edit')
   const [verdictVisible, setVerdictVisible] = useState(true)
   const verdictRef = useRef<HTMLDivElement>(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importedNote, setImportedNote] = useState<string | null>(null)
   const summary = summarize(draft)
   const stress = simulate(draft, params)
   const hasSpending = draft.cashflow.livingExpense > 0 || summary.monthlyDebtPayment > 0
@@ -107,15 +112,45 @@ export function Ledger({
 
   const header = <Header draft={draft} title={t.appName} aside={headerAside} onDraft={onDraft} />
 
-  const notice = savedNote ? (
+  const noticeText = importedNote ?? savedNote
+  const notice = noticeText ? (
     <p role="status" className="flex items-center gap-2 rounded-2xl bg-gain/12 px-4 py-3 text-[15px] font-semibold text-gain">
       <Check className="size-4.5" />
-      {savedNote}
+      {noticeText}
     </p>
   ) : null
 
+  const importer = (
+    <>
+      <button type="button" className="glass flex items-center gap-3 rounded-[1.375rem] px-4 py-3.5 text-left transition-transform active:scale-[0.99]" onClick={() => setImportOpen(true)}>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+          <ScanText className="size-5" />
+        </span>
+        <span className="grid min-w-0 flex-1 gap-0.5">
+          <span className="text-[16px] font-bold">{t.importer.entry}</span>
+          <span className="text-[13px] leading-snug text-muted-foreground">{t.importer.entryHint}</span>
+        </span>
+        <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+      </button>
+      {importOpen && (
+        <Suspense fallback={null}>
+          <ImportDialog
+            open
+            draft={draft}
+            onOpenChange={setImportOpen}
+            onApply={(patch, count) => {
+              onDraft(patch)
+              setImportedNote(t.importer.imported(count))
+            }}
+          />
+        </Suspense>
+      )}
+    </>
+  )
+
   const sheets = (
     <div className="grid gap-4">
+      {importer}
       {GROUPS.map((group) => (
         <GroupSheet key={group.id} group={group.id} draft={draft} previous={previous} onDraft={onDraft} />
       ))}

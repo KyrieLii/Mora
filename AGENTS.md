@@ -28,6 +28,7 @@ Before finishing a change, run `pnpm typecheck`, `pnpm test` and `pnpm build`.
 - `src/components/ledger/`: the sheets (`GroupSheet`, `FlowSheet`, `InsuranceSheet`), `Verdict`, `ReportPanel`, `TrendChart`, `Header`, `InfoTip`, `AmountInput`.
 - `src/screens/Ledger.tsx`: desktop two-column page; on mobile, an edit view and a read-only result view. `src/screens/Example.tsx` is the read-only sample.
 - `src/sample.ts`: a fictional household. Keep it fictional.
+- `src/lib/import/`: screenshot and text import. The user brings their own API key (Anthropic, or any OpenAI-compatible endpoint), stored only in localStorage under `ffr-ai-settings`, and the browser calls the provider directly; there is no server. `prompt.ts` holds the system prompt and JSON schema, `parse.ts` validates model output (drops zero amounts and other currencies, scrubs card or account numbers from names), `match.ts` proposes update-or-add against the current sheet and applies only the lines the user ticks, and `providers.ts` makes the calls. The UI is `src/components/ledger/ImportDialog.tsx`. Imports always go through the review step; never write model output to the sheet without it. Test fixtures must be synthetic, never taken from real screenshots.
 
 ## Data model rules
 
