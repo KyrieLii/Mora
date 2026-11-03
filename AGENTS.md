@@ -17,7 +17,10 @@ pnpm test         # Vitest, engine tests
 pnpm typecheck    # tsc --noEmit
 pnpm build        # production build
 pnpm build:skill  # rebuild the skill CLI and its report page
+pnpm package:release  # zip the skill and web builds into release/
 ```
+
+CI (`.github/workflows/ci.yml`) runs these on every push and pull request, fails if the committed `ffr.mjs` differs from a fresh `pnpm build:skill`, and runs the skill CLI on Node 20 and 24. Pushing a `v*` tag that matches `package.json` runs `release.yml`, which publishes the zips to a GitHub Release.
 
 Before finishing a change, run `pnpm typecheck`, `pnpm test` and `pnpm build`.
 

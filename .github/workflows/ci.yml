@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+      - run: pnpm build:skill
+
+      # ffr.mjs is committed so the skill works straight from the repo; it must match the source.
+      - name: Check the committed skill bundle is up to date
+        run: |
+          if ! git diff --quiet -- skills/; then
+            git diff --stat -- skills/
+            echo "::error::skills/ is out of date. Run pnpm build:skill and commit the result."
+            exit 1
+          fi
+
+      - run: pnpm package:release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: release/
+          retention-days: 14
+
+  skill-runtime:
+    name: Skill CLI on Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 24]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      # The committed bundle has no dependencies; run it as an agent would.
+      - name: Preview and save a sample review
+        run: |
+          ffr="node skills/family-finance-review/scripts/ffr.mjs --dir $RUNNER_TEMP/ffr"
+          echo '{"date":"2026-01-01","items":[{"category":"checking","amount":100000}],"flows":[{"category":"living","amount":8000}]}' > "$RUNNER_TEMP/review.json"
+          $ffr categories > /dev/null
+          $ffr preview "$RUNNER_TEMP/review.json"
+          $ffr save "$RUNNER_TEMP/review.json"
+          $ffr report latest
+          test -s "$RUNNER_TEMP/ffr/reviews/2026-01-01.json"
+          test -s "$RUNNER_TEMP/ffr/reports/2026-01-01.html"

@@ -10,3 +10,4 @@ dist-report
 .env
 .env.*
 !.env.example
+release

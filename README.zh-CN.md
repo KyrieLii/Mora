@@ -33,7 +33,7 @@
 - 每次盘点存成一个 JSON 文件：`~/.family-finance-review/reviews/<日期>.json`。任何一次都能重新打开，也能做环比、同比。
 - 结果页是单个 HTML 文件，离线可用，不上传任何数据。
 
-安装方法：把这个文件夹复制或链接到 Agent 的 skills 目录，比如 `~/.claude/skills/family-finance-review`。流程见 [SKILL.md](skills/family-finance-review/SKILL.md)，数据格式见 [format.md](skills/family-finance-review/references/format.md)。
+安装方法：从 [Releases](https://github.com/KyrieLii/family-finance-review/releases) 下载 `family-finance-review-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`。如果克隆了仓库，也可以直接复制或链接这个文件夹。流程见 [SKILL.md](skills/family-finance-review/SKILL.md)，数据格式见 [format.md](skills/family-finance-review/references/format.md)。
 
 ## 开始使用
 
@@ -53,6 +53,9 @@ pnpm dev
 | `pnpm typecheck` | 类型检查 |
 | `pnpm fx:update` | 更新 `public/fx.json` 中的美元兑人民币汇率 |
 | `pnpm build:skill` | 重新打包 skill 的命令行工具和内嵌的结果页 |
+| `pnpm package:release` | 在两次构建之后，把 skill 和网页产物打成 `release/*.zip` |
+
+发布新版本：改 `package.json` 里的 `version` 并提交，再推送对应的 tag，比如 `git tag v0.2.0 && git push origin v0.2.0`。GitHub Actions 会检查、构建，并把 skill 压缩包、网页压缩包和校验文件附到 Release 上。带后缀的 tag（如 `v0.2.0-rc.1`）会标记为预发布。
 
 想在 `pnpm dev` 里使用截图导入又不想手动填 Key：把 `.env.example` 复制成 `.env`，填上 `ANTHROPIC_API_KEY`（或者 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 和 `FFR_AI_MODEL`）。终端里已经设置的环境变量也能用。只有开发服务器会读取这些变量：Key 不会存进浏览器，也不会打包进 `pnpm build` 的产物。
 

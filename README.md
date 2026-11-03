@@ -33,7 +33,7 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 - Each review is saved as one JSON file, `~/.family-finance-review/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year.
 - Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
 
-To install, copy or link the folder into your agent's skills directory, for example `~/.claude/skills/family-finance-review`. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
+To install, download `family-finance-review-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`. From a clone, you can instead copy or link the folder. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
 
 ## Getting started
 
@@ -53,6 +53,9 @@ pnpm dev
 | `pnpm typecheck` | Type-check the project |
 | `pnpm fx:update` | Refresh the USD/CNY rate in `public/fx.json` |
 | `pnpm build:skill` | Rebuild the skill's CLI and its embedded report page |
+| `pnpm package:release` | Pack the skill and the built web app into `release/*.zip`, after the two builds |
+
+To publish a release, set `version` in `package.json`, commit, then push a matching tag, for example `git tag v0.2.0 && git push origin v0.2.0`. GitHub Actions checks, builds and attaches the skill zip, the web zip and their checksums to the release. A tag with a suffix, such as `v0.2.0-rc.1`, is marked as a pre-release.
 
 To use screenshot import in `pnpm dev` without typing a key, copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`, `OPENAI_BASE_URL` and `FFR_AI_MODEL`). Variables already set in your shell work too. Only the dev server reads them: the key is never stored in the browser or built into `pnpm build`.
 
