@@ -63,9 +63,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # setup-node v5 caches by the packageManager field automatically, which needs pnpm; this job installs nothing.
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
+          package-manager-cache: false
 
       # The committed bundle has no dependencies; run it as an agent would.
       - name: Preview and save a sample review
