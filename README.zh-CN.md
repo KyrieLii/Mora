@@ -76,3 +76,13 @@ React、Vite、TypeScript、Tailwind CSS v4、Radix（通过 shadcn/ui）、luci
 ## 声明
 
 本工具只做情景推演，不构成投资、法律或房产交易建议。默认假设（如股市跌幅、收入中断后的生活支出等）是产品假设，尚未用真实数据校准。
+
+## 许可协议
+
+Copyright 2026 Kyrie Li。采用 [GNU Affero 通用公共许可证 v3.0](LICENSE)（AGPL-3.0-only）。
+
+你可以使用、修改和分享，包括商业用途，前提是遵守 AGPL：分发修改后的版本，或者把修改后的版本部署成网络服务给别人用，都必须以同一协议公开完整源码。
+
+如果想在闭源产品或服务里使用，不想承担这些义务，可以向作者购买商业授权：请[提交 issue](https://github.com/KyrieLii/family-finance-review/issues) 联系。
+
+欢迎贡献代码。提交 Pull Request 即表示你同意你的贡献可以同时按 AGPL 和商业授权分发。

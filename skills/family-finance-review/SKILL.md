@@ -1,6 +1,7 @@
 ---
 name: family-finance-review
 description: Run a quarterly or yearly household balance-sheet review (家庭财务盘点) from the user's screenshots, pasted text or statements. Use when the user wants to take stock of family or personal assets, debts, income and spending, see net worth and how many months of spending their savings would cover (安全垫), compare with earlier reviews (环比 / 同比), or open a saved review. Produces local JSON files and a self-contained HTML result page.
+license: AGPL-3.0-only (https://github.com/KyrieLii/family-finance-review/blob/main/LICENSE). A commercial license is available from the author.
 ---
 
 # Family finance review

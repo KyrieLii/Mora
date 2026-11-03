@@ -76,3 +76,13 @@ React, Vite, TypeScript, Tailwind CSS v4, Radix (via shadcn/ui), lucide icons, V
 ## Disclaimer
 
 This tool runs scenarios only. It is not investment, legal or real-estate advice. Default assumptions (market drop, cost of living after job loss, and so on) are product assumptions and have not been calibrated against real data.
+
+## License
+
+Copyright 2026 Kyrie Li. Licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only).
+
+You may use, change and share it, including commercially, as long as you follow the AGPL: if you distribute a modified version, or run one as a network service for others, you must make its complete source available under the same license.
+
+If you want to use it in a closed-source product or service without those obligations, a commercial license is available: [open an issue](https://github.com/KyrieLii/family-finance-review/issues) to ask.
+
+Contributions are welcome. By sending a pull request, you agree that your contribution may be distributed under both the AGPL and the commercial license.
