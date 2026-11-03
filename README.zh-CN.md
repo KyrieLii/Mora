@@ -54,6 +54,8 @@ pnpm dev
 | `pnpm fx:update` | 更新 `public/fx.json` 中的美元兑人民币汇率 |
 | `pnpm build:skill` | 重新打包 skill 的命令行工具和内嵌的结果页 |
 
+想在 `pnpm dev` 里使用截图导入又不想手动填 Key：把 `.env.example` 复制成 `.env`，填上 `ANTHROPIC_API_KEY`（或者 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 和 `FFR_AI_MODEL`）。终端里已经设置的环境变量也能用。只有开发服务器会读取这些变量：Key 不会存进浏览器，也不会打包进 `pnpm build` 的产物。
+
 ## 目录结构
 
 ```text

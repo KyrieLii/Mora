@@ -1,5 +1,6 @@
 import { AmountInput } from '@/components/ledger/AmountInput'
 import { Segmented } from '@/components/ledger/GroupSheet'
+import { InfoTip } from '@/components/ledger/InfoTip'
 import { CATEGORIES, FLOW_CATEGORIES, GROUPS, type Currency, type Frequency, type Snapshot } from '@/engine'
 import { useI18n } from '@/i18n'
 import { money, shortMoney } from '@/lib/format'
@@ -7,12 +8,13 @@ import { readImage, type ImageInput } from '@/lib/import/image'
 import { applyProposals, proposeChanges } from '@/lib/import/match'
 import { kindOf } from '@/lib/import/parse'
 import { ImportError, recognise, testConnection } from '@/lib/import/providers'
-import { DEFAULT_MODEL, forgetSettings, isReady, loadSettings, saveSettings, type AiSettings, type Provider } from '@/lib/import/settings'
+import { DEFAULT_MODEL, forgetSettings, isReady, loadSettings, saveSettings, usesEnvKey, type AiSettings, type Provider } from '@/lib/import/settings'
 import type { ImportLine } from '@/lib/import/types'
 import { cn } from '@/lib/utils'
-import { Check, ChevronLeft, ImagePlus, LoaderCircle, Settings2, X } from 'lucide-react'
+import { Check, ChevronLeft, ImagePlus, LoaderCircle, RefreshCw, Settings2, X } from 'lucide-react'
 import { Dialog } from 'radix-ui'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Toast, type ToastMessage } from './Toast'
 
 type Step = 'input' | 'settings' | 'loading' | 'review'
 interface Row {
@@ -34,12 +36,46 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
   )
 }
 
-function SettingsStep({ settings, onSave, onBack }: { settings: AiSettings; onSave: (next: AiSettings) => void; onBack?: () => void }) {
+type Connection = 'untested' | 'testing' | 'ok' | 'error'
+const DOT: Record<Connection, string> = { untested: 'bg-muted-foreground/45', testing: 'bg-muted-foreground/45', ok: 'bg-gain', error: 'bg-destructive' }
+
+/** Tests the connection; the dot shows the result: grey untested, green connected, red failed. Remount it when the settings change. */
+function ConnectionTest({ form, onError }: { form: AiSettings; onError: (text: string) => void }) {
+  const { t } = useI18n()
+  const s = t.importer.setup
+  const [state, setState] = useState<Connection>('untested')
+  const label = { untested: s.untested, testing: s.testing, ok: s.testOk, error: s.testFailed }[state]
+
+  return (
+    <button
+      type="button"
+      aria-label={`${s.test} · ${label}`}
+      title={`${s.test} · ${label}`}
+      className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+      disabled={!isReady(form) || state === 'testing'}
+      onClick={async () => {
+        setState('testing')
+        try {
+          await testConnection(form)
+          setState('ok')
+        } catch (error) {
+          setState('error')
+          onError(errorText(t, error))
+        }
+      }}
+    >
+      <RefreshCw className={cn('size-4.5', state === 'testing' && 'animate-spin')} />
+      <span aria-hidden className={cn('absolute top-2.5 right-2.5 size-2 rounded-full transition-colors', DOT[state])} />
+    </button>
+  )
+}
+
+function SettingsStep({ settings, onSave, onBack, onError }: { settings: AiSettings; onSave: (next: AiSettings) => void; onBack?: () => void; onError: (text: string) => void }) {
   const { t } = useI18n()
   const s = t.importer.setup
   const [form, setForm] = useState(settings)
-  const [status, setStatus] = useState<{ tone: 'ok' | 'error' | 'info'; text: string } | null>(null)
-  const [testing, setTesting] = useState(false)
+  const [status, setStatus] = useState<string | null>(null)
+  const fromEnv = usesEnvKey(form)
   const update = (patch: Partial<AiSettings>) => {
     setForm((current) => ({ ...current, ...patch }))
     setStatus(null)
@@ -55,9 +91,28 @@ function SettingsStep({ settings, onSave, onBack }: { settings: AiSettings; onSa
         <Segmented label={s.provider} value={form.provider} options={[['anthropic', s.anthropic], ['openai', s.openai]]} onChange={switchProvider} />
       </div>
       {form.provider === 'openai' && <p className="-mt-2 text-[13px] leading-relaxed text-muted-foreground">{s.openaiHint}</p>}
-      <Field label={s.apiKey}>
-        <input type="password" autoComplete="off" spellCheck={false} className={FIELD} placeholder={s.apiKeyPlaceholder} value={form.apiKey} onChange={(event) => update({ apiKey: event.target.value })} />
-      </Field>
+      <div className="grid gap-1.5">
+        <div className="flex items-center gap-1">
+          <label htmlFor="ffr-api-key" className="text-[13px] font-semibold text-muted-foreground">
+            {s.apiKey}
+          </label>
+          <InfoTip label={s.apiKey}>{fromEnv ? s.fromEnv : s.keyNote}</InfoTip>
+        </div>
+        <div className="relative">
+          <input
+            id="ffr-api-key"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            className={cn(FIELD, 'pr-12')}
+            placeholder={s.apiKeyPlaceholder}
+            value={form.apiKey}
+            onChange={(event) => update({ apiKey: event.target.value })}
+          />
+          {/* Any edit makes the last result stale, so a new key starts it untested. */}
+          <ConnectionTest key={[form.provider, form.apiKey, form.model, form.baseUrl].join('\n')} form={form} onError={onError} />
+        </div>
+      </div>
       <Field label={s.model}>
         <input autoComplete="off" spellCheck={false} className={FIELD} placeholder={form.provider === 'anthropic' ? DEFAULT_MODEL.anthropic : 'qwen-vl-max'} value={form.model} onChange={(event) => update({ model: event.target.value })} />
       </Field>
@@ -66,32 +121,13 @@ function SettingsStep({ settings, onSave, onBack }: { settings: AiSettings; onSa
           <input type="url" autoComplete="off" spellCheck={false} className={FIELD} placeholder={s.baseUrlPlaceholder} value={form.baseUrl} onChange={(event) => update({ baseUrl: event.target.value })} />
         </Field>
       )}
-      <p className="rounded-2xl bg-muted/70 px-4 py-3 text-[13px] leading-relaxed text-muted-foreground">{s.keyNote}</p>
       {status && (
-        <p role="status" className={cn('text-[14px] font-semibold', status.tone === 'ok' && 'text-gain', status.tone === 'error' && 'text-destructive', status.tone === 'info' && 'text-muted-foreground')}>
-          {status.text}
+        <p role="status" className="text-[14px] font-semibold text-muted-foreground">
+          {status}
         </p>
       )}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={QUIET}
-          disabled={!isReady(form) || testing}
-          onClick={async () => {
-            setTesting(true)
-            try {
-              await testConnection(form)
-              setStatus({ tone: 'ok', text: s.testOk })
-            } catch (error) {
-              setStatus({ tone: 'error', text: errorText(t, error) })
-            } finally {
-              setTesting(false)
-            }
-          }}
-        >
-          {testing ? s.testing : s.test}
-        </button>
-        {settings.apiKey && (
+      {settings.apiKey && !usesEnvKey(settings) && (
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             className={cn(QUIET, 'text-destructive')}
@@ -99,13 +135,13 @@ function SettingsStep({ settings, onSave, onBack }: { settings: AiSettings; onSa
               forgetSettings()
               setForm({ ...form, apiKey: '' })
               onSave({ ...form, apiKey: '' })
-              setStatus({ tone: 'info', text: s.forgotten })
+              setStatus(s.forgotten)
             }}
           >
             {s.forget}
           </button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="grid gap-2">
         <button type="button" className={ACTION} disabled={!isReady(form)} onClick={() => onSave(form)}>
           {onBack ? s.save : s.saveAndContinue}
@@ -365,6 +401,9 @@ export function ImportDialog({ open, draft, onOpenChange, onApply }: { open: boo
   const [rows, setRows] = useState<Row[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const run = useRef(0)
+  const [toast, setToast] = useState<ToastMessage | null>(null)
+  const showError = useCallback((text: string) => setToast({ id: Date.now(), text }), [])
+  const hideToast = useCallback(() => setToast(null), [])
   const providerName = settings.provider === 'anthropic' ? 'Anthropic Claude' : settings.baseUrl.replace(/^https?:\/\//, '').split('/')[0] || t.importer.setup.openai
 
   const reset = () => {
@@ -464,6 +503,7 @@ export function ImportDialog({ open, draft, onOpenChange, onApply }: { open: boo
                 <SettingsStep
                   settings={settings}
                   onBack={backFromSettings}
+                  onError={showError}
                   onSave={(next) => {
                     setSettings(next)
                     if (next.apiKey) saveSettings(next)
@@ -530,6 +570,7 @@ export function ImportDialog({ open, draft, onOpenChange, onApply }: { open: boo
               />
             )}
           </div>
+          <Toast toast={toast} onDone={hideToast} />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -54,6 +54,8 @@ pnpm dev
 | `pnpm fx:update` | Refresh the USD/CNY rate in `public/fx.json` |
 | `pnpm build:skill` | Rebuild the skill's CLI and its embedded report page |
 
+To use screenshot import in `pnpm dev` without typing a key, copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`, `OPENAI_BASE_URL` and `FFR_AI_MODEL`). Variables already set in your shell work too. Only the dev server reads them: the key is never stored in the browser or built into `pnpm build`.
+
 ## Project structure
 
 ```text

@@ -7,3 +7,6 @@ dist
 /PRODUCT.md
 /DESIGN.md
 dist-report
+.env
+.env.*
+!.env.example
