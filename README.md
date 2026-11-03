@@ -42,7 +42,13 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 - Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
 - The CLI works offline except `ffr fx`, which the agent runs to get the day's USD/CNY rate from api.frankfurter.dev. On a result page you can also refresh or edit the rate to see the figures at another rate; the saved review does not change.
 
-To install, download `family-finance-review-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`. From a clone, you can instead copy or link the folder. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
+To install it with the [`skills`](https://github.com/vercel-labs/skills) CLI, which detects Claude Code, Codex and other agents and copies the skill into their skills folders:
+
+```bash
+npx skills add KyrieLii/family-finance-review --skill family-finance-review
+```
+
+Add `-a claude-code` to install for one agent only, or `-g` to install for your user rather than the current project. You can also download `family-finance-review-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`, or copy or link the folder from a clone. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
 
 ## Getting started
 
