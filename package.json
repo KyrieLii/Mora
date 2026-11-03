@@ -2,7 +2,16 @@
   "name": "family-finance-review",
   "private": true,
   "version": "0.1.0",
+  "description": "A quick, private household balance-sheet review: net worth, cash flow and safety cushion, in the browser or from your AI agent.",
   "license": "AGPL-3.0-only",
+  "author": "Kyrie Li (https://github.com/KyrieLii)",
+  "homepage": "https://github.com/KyrieLii/family-finance-review#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KyrieLii/family-finance-review.git"
+  },
+  "bugs": "https://github.com/KyrieLii/family-finance-review/issues",
+  "keywords": ["personal-finance", "household", "net-worth", "balance-sheet", "agent-skill"],
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {

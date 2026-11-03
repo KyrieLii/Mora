@@ -8,6 +8,12 @@
 
 > 当前是原型。所有数据只保存在你的浏览器本地，不需要注册账号。使用截图导入时，你选的图片或文字会从浏览器直接发给你自己配置的 AI 服务商，不经过我们的服务器；API Key 只保存在你的浏览器里。
 
+<p align="center">
+  <img src="docs/screenshots/desktop-zh.png" width="62%" alt="桌面端示例结果：净资产、45 个月的安全垫，以及资产负债构成" />
+  <img src="docs/screenshots/mobile-zh.png" width="20%" alt="手机深色模式下的同一份示例结果" />
+</p>
+<p align="center"><sub>内置的示例家庭，数据是虚构的。</sub></p>
+
 有三种用法：
 
 1. **在网页里手动录入**，不需要 AI。
@@ -54,6 +60,12 @@ pnpm dev
 | `pnpm fx:update` | 更新 `public/fx.json` 中的美元兑人民币汇率 |
 | `pnpm build:skill` | 重新打包 skill 的命令行工具和内嵌的结果页 |
 | `pnpm package:release` | 在两次构建之后，把 skill 和网页产物打成 `release/*.zip` |
+
+部署网页：在 [Vercel](https://vercel.com/new) 导入这个仓库即可，构建配置在 `vercel.json` 里。也可以一键部署一份自己的：
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2Ffamily-finance-review)
+
+部署后的网页仍然把每个人的数据存在他自己的浏览器里。`.env` 里的 Key 不会被打包进部署产物。
 
 发布新版本：改 `package.json` 里的 `version` 并提交，再推送对应的 tag，比如 `git tag v0.2.0 && git push origin v0.2.0`。GitHub Actions 会检查、构建，并把 skill 压缩包、网页压缩包和校验文件附到 Release 上。带后缀的 tag（如 `v0.2.0-rc.1`）会标记为预发布。
 

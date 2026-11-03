@@ -8,6 +8,12 @@ The interface is available in Chinese (家庭财务盘点) and English and is bu
 
 > Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser.
 
+<p align="center">
+  <img src="docs/screenshots/desktop-en.png" width="62%" alt="Sample results on desktop: net worth, a 45-month safety cushion, and the asset and liability breakdown" />
+  <img src="docs/screenshots/mobile-en.png" width="20%" alt="The same sample results on a phone in dark mode" />
+</p>
+<p align="center"><sub>The built-in sample household, which is fictional.</sub></p>
+
 There are three ways to use it:
 
 1. **Enter figures by hand** in the web app. No AI needed.
@@ -54,6 +60,12 @@ pnpm dev
 | `pnpm fx:update` | Refresh the USD/CNY rate in `public/fx.json` |
 | `pnpm build:skill` | Rebuild the skill's CLI and its embedded report page |
 | `pnpm package:release` | Pack the skill and the built web app into `release/*.zip`, after the two builds |
+
+To host the web app, import the repository in [Vercel](https://vercel.com/new); `vercel.json` sets the build. Or deploy your own copy:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2Ffamily-finance-review)
+
+A hosted copy still keeps every user's data in their own browser. Keys in `.env` are never built into a deployment.
 
 To publish a release, set `version` in `package.json`, commit, then push a matching tag, for example `git tag v0.2.0 && git push origin v0.2.0`. GitHub Actions checks, builds and attaches the skill zip, the web zip and their checksums to the release. A tag with a suffix, such as `v0.2.0-rc.1`, is marked as a pre-release.
 
