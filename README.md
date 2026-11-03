@@ -8,7 +8,7 @@ A quick, private balance-sheet check-up for households. Every quarter or year, u
 
 The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
 
-> Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser.
+> Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser. Tapping refresh next to the exchange rate fetches the ECB reference rate from api.frankfurter.dev, which sees your IP address but nothing you entered.
 
 <p align="center">
   <img src="docs/screenshots/desktop-en.png" width="62%" alt="Sample results on desktop: net worth, a 45-month safety cushion, and the asset and liability breakdown" />

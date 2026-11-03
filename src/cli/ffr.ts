@@ -8,7 +8,8 @@ import { spawn } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
-import fx from '../../public/fx.json'
+// Used only when there is no earlier review; kept apart from public/fx.json so a new site rate does not change the bundle.
+import fx from './fallback-fx.json'
 import template from '../../dist-report/report.html?raw'
 import { dataDir, loadReviews, reviewPath, writeReview, writeText } from './store'
 
