@@ -187,6 +187,9 @@ export const zh = {
     preview: '预览 · 尚未保存',
     previewNote: '核对下面的明细和结果。没有问题，就在对话里让 Agent 保存；需要修改，也直接告诉它。',
     details: '明细',
+    rateChanged: '已按新汇率重新计算',
+    rateChangedNote: (saved: number) => `页面只是换了汇率看结果，盘点文件没有改动，原汇率是 ${saved}。要按新汇率保存，请在对话里告诉 Agent。`,
+    rateRestore: '恢复原汇率',
   },
 
   importer: {

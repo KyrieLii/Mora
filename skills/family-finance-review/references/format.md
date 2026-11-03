@@ -11,6 +11,7 @@ A JSON object. Only `items` is required; everything else has a default. Get the 
   "scope": "family",
   "baseCurrency": "CNY",
   "usdCny": 7.12,
+  "fxDate": "2026-11-02",
   "items": [
     { "category": "checking", "name": "招行 活期", "amount": 52000, "currency": "CNY" },
     { "category": "mmf", "name": "余额宝", "amount": 18500 },
@@ -36,7 +37,8 @@ A JSON object. Only `items` is required; everything else has a default. Get the 
 | `period` | `quarter` | `quarter` or `year`. |
 | `scope` | `family` | `family` or `personal`. |
 | `baseCurrency` | `CNY` | Currency the results are shown in: `CNY` or `USD`. |
-| `usdCny` | previous review's rate, else the bundled rate | Dollars to yuan, e.g. `7.12`. Set it when you know the current rate. |
+| `usdCny` | previous review's rate, else the bundled rate | Dollars to yuan, e.g. `7.12`. Use the `usdCny` from `ffr fx`. |
+| `fxDate` | `date` when `usdCny` is set | The day the rate was published, `YYYY-MM-DD`: the `fxDate` from `ffr fx`. Ignored without `usdCny`. |
 | `items[]` | | Balances: assets and liabilities. |
 | `flows[]` | `[]` | Income and spending lines. Without spending lines the safety cushion cannot be worked out. |
 | `insurance[]` | `[]` | Yearly reviews only: any of `life`, `critical`, `medical`, or `none` / `unknown`. |
@@ -49,7 +51,7 @@ Loan repayments belong on the liability as `monthlyPayment`, not as an expense l
 
 ## Saved review files
 
-`ffr save` writes one file per review: `<dir>/reviews/<date>.json`. It is the input after validation, with ids, the exchange-rate date and the derived monthly cash flow added:
+`ffr save` writes one file per review: `<dir>/reviews/<date>.json`. It is the input after validation, with ids, the exchange-rate date (when not given) and the derived monthly cash flow added:
 
 ```json
 {
@@ -61,7 +63,7 @@ Loan repayments belong on the liability as `monthlyPayment`, not as an expense l
   "scope": "family",
   "baseCurrency": "CNY",
   "usdCny": 7.12,
-  "fxDate": "2026-11-03",
+  "fxDate": "2026-11-02",
   "items": [{ "id": "…", "category": "checking", "name": "招行 活期", "amount": 52000, "currency": "CNY" }],
   "flows": [{ "id": "…", "category": "salary", "name": "我的工资", "amount": 30000, "currency": "CNY", "frequency": "monthly" }],
   "insurance": [],

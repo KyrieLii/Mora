@@ -40,6 +40,7 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 
 - Each review is saved as one JSON file, `~/.family-finance-review/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year.
 - Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
+- The CLI works offline except `ffr fx`, which the agent runs to get the day's USD/CNY rate from api.frankfurter.dev. On a result page you can also refresh or edit the rate to see the figures at another rate; the saved review does not change.
 
 To install, download `family-finance-review-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`. From a clone, you can instead copy or link the folder. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
 

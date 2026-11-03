@@ -64,7 +64,7 @@ export function ThemeToggle() {
 }
 
 /** The USD/RMB rate: edit by hand, or refresh it from a third-party site on request. An empty fxDate marks a hand-entered rate. */
-function RateField({ draft, onDraft }: { draft: Snapshot; onDraft: (patch: Partial<Snapshot>) => void }) {
+export function RateField({ draft, onDraft }: { draft: Snapshot; onDraft: (patch: Partial<Snapshot>) => void }) {
   const { t } = useI18n()
   const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
   const refresh = async () => {

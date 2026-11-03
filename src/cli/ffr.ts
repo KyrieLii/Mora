@@ -1,6 +1,7 @@
 import { CATEGORIES, FLOW_CATEGORIES, GROUPS, type Snapshot } from '@/engine'
 import { en } from '@/i18n/en'
 import { zh } from '@/i18n/zh'
+import { FX_SOURCE_HOST, fetchLatestRate } from '@/lib/fx'
 import { digest } from '@/lib/snapshot/digest'
 import { normalizeSnapshot } from '@/lib/snapshot/normalize'
 import { DATA_PLACEHOLDER, embedPayload, type ReportPayload } from '@/report/payload'
@@ -25,6 +26,7 @@ Commands
   list                       List saved reviews.
   show [date|latest]         Print the figures of a saved review, with month-on-month and year-on-year change.
   report [date|latest]       Write the HTML result page of a saved review, with every earlier review for trends.
+  fx                         Get the latest USD/CNY reference rate from ${FX_SOURCE_HOST}. The only command that uses the network.
 
 Options
   --dir <path>      Data folder (default $FFR_DIR or ~/.family-finance-review).
@@ -104,7 +106,19 @@ function writeHtml(payload: ReportPayload, out: string, open: boolean) {
   return path
 }
 
-function main() {
+/** Fetches the reference rate; on failure, says which rate a review would fall back to. */
+async function latestRate(dir: string) {
+  try {
+    const rate = await fetchLatestRate()
+    print({ ok: true, usdCny: rate.usdCny, fxDate: rate.date, source: `European Central Bank reference rate, via ${FX_SOURCE_HOST}` })
+  } catch (error) {
+    const last = loadReviews(dir).at(-1)
+    const fallback = last ? { usdCny: last.usdCny, fxDate: last.fxDate, from: 'previous review' } : { usdCny: fx.usdCny, fxDate: fx.date, from: 'bundled rate' }
+    fail(`Could not get the rate from ${FX_SOURCE_HOST}: ${(error as Error).message}`, { fallback })
+  }
+}
+
+async function main() {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
     options: {
@@ -190,9 +204,12 @@ function main() {
       return print({ ok: true, report: path, figures: figures(review, before(reviews, review.date)) })
     }
 
+    case 'fx':
+      return latestRate(dir)
+
     default:
       fail(`Unknown command "${command}". Run ffr --help.`)
   }
 }
 
-main()
+await main()

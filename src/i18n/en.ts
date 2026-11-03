@@ -186,6 +186,9 @@ export const en: Messages = {
     preview: 'Preview · not saved yet',
     previewNote: 'Check the lines and results below. If they look right, ask your agent to save them; if not, tell it what to change.',
     details: 'Details',
+    rateChanged: 'Recalculated at a new rate',
+    rateChangedNote: (saved: number) => `Only this page uses the new rate; the review file is unchanged and its rate is ${saved}. To save the new rate, tell your agent.`,
+    rateRestore: 'Use the saved rate',
   },
 
   importer: {

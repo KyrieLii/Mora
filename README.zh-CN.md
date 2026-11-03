@@ -40,6 +40,7 @@
 
 - 每次盘点存成一个 JSON 文件：`~/.family-finance-review/reviews/<日期>.json`。任何一次都能重新打开，也能做环比、同比。
 - 结果页是单个 HTML 文件，离线可用，不上传任何数据。
+- 命令行工具只有 `ffr fx` 会联网：Agent 用它从 api.frankfurter.dev 获取当天的美元兑人民币汇率。在结果页上也可以刷新或手动修改汇率，看换个汇率后的结果，已保存的盘点不会变。
 
 安装方法：从 [Releases](https://github.com/KyrieLii/family-finance-review/releases) 下载 `family-finance-review-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`。如果克隆了仓库，也可以直接复制或链接这个文件夹。流程见 [SKILL.md](skills/family-finance-review/SKILL.md)，数据格式见 [format.md](skills/family-finance-review/references/format.md)。
 

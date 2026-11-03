@@ -71,7 +71,10 @@ export function normalizeSnapshot(
   if (!CURRENCIES.includes(baseCurrency)) errors.push(`baseCurrency must be "CNY" or "USD", got ${JSON.stringify(raw.baseCurrency)}.`)
   const usdCny = raw.usdCny ?? previous?.usdCny ?? fallbackRate.usdCny
   if (!isNumber(usdCny) || usdCny <= 0) errors.push(`usdCny must be a positive number, got ${JSON.stringify(raw.usdCny)}.`)
-  const fxDate = raw.fxDate ?? (raw.usdCny ? date : fallbackRate.date)
+  // The date belongs to whichever rate is used: the one given (from `ffr fx`, or the review date), the previous review's, or the bundled one.
+  const fxDate = raw.usdCny !== undefined ? (raw.fxDate ?? date) : previous ? previous.fxDate : fallbackRate.date
+  if (raw.fxDate !== undefined && !ISO_DATE.test(raw.fxDate)) errors.push(`fxDate must look like 2026-11-03, got ${JSON.stringify(raw.fxDate)}.`)
+  if (raw.fxDate !== undefined && raw.usdCny === undefined) warnings.push('fxDate is ignored without usdCny.')
 
   const takenItems = new Set<string>()
   const items: Item[] = []

@@ -48,6 +48,14 @@ describe('normalizeSnapshot', () => {
     expect(second.usdCny).toBe(7)
   })
 
+  it('keeps each rate with its own date', () => {
+    const fetched = normalizeSnapshot({ ...input, usdCny: 6.65, fxDate: '2026-10-31' }, options).snapshot!
+    expect(fetched).toMatchObject({ usdCny: 6.65, fxDate: '2026-10-31' })
+    expect(normalizeSnapshot({ ...input, usdCny: 6.7 }, options).snapshot!.fxDate).toBe('2026-11-03')
+    expect(normalizeSnapshot({ ...input, date: '2027-02-01' }, { ...options, previous: fetched }).snapshot).toMatchObject({ usdCny: 6.65, fxDate: '2026-10-31' })
+    expect(normalizeSnapshot({ ...input, usdCny: 6.7, fxDate: 'today' }, options).errors[0]).toContain('fxDate')
+  })
+
   it('warns about long numbers in names', () => {
     const { warnings } = normalizeSnapshot({ ...input, items: [{ category: 'checking', name: '储蓄卡 6222021234567890', amount: 1 }] }, options)
     expect(warnings.some((warning) => warning.includes('card or account'))).toBe(true)
