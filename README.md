@@ -19,6 +19,15 @@ The interface is available in Chinese (家庭财务盘点) and English and is bu
 
 It is not a budgeting app and does not connect to banks. It is a snapshot you update a few times a year.
 
+## Use it from an agent
+
+`skills/family-finance-review/` is an [Agent Skill](https://agentskills.io) for people who already work with an AI agent such as Claude Code or Codex. The agent reads your screenshots and statements, writes the review as JSON, and runs the bundled CLI (`scripts/ffr.mjs`, Node 20+, no dependencies), which does every calculation with the same engine as the web app. You check an HTML preview, confirm in chat, and only then is the review saved.
+
+- Each review is saved as one JSON file, `~/.family-finance-review/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year.
+- Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
+
+To install, copy or link the folder into your agent's skills directory, for example `~/.claude/skills/family-finance-review`. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
+
 ## Getting started
 
 Requires Node 20+ and pnpm (available through Corepack).
@@ -36,6 +45,7 @@ pnpm dev
 | `pnpm test` | Run the engine tests (Vitest) |
 | `pnpm typecheck` | Type-check the project |
 | `pnpm fx:update` | Refresh the USD/CNY rate in `public/fx.json` |
+| `pnpm build:skill` | Rebuild the skill's CLI and its embedded report page |
 
 ## Project structure
 
@@ -45,6 +55,8 @@ src/
   lib/         Formatting, local storage and migration, theme, icons
   components/  Ledger UI (sheets, verdict, report, trend chart) and the one shadcn primitive in use
   screens/     The review page (edit and result) and the read-only sample
+  report/      The standalone result page the skill's CLI writes
+  cli/         The skill's CLI (bundled into skills/family-finance-review/scripts/ffr.mjs)
   sample.ts    A fictional household used by the sample page
 ```
 

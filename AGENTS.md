@@ -16,6 +16,7 @@ pnpm dev          # dev server
 pnpm test         # Vitest, engine tests
 pnpm typecheck    # tsc --noEmit
 pnpm build        # production build
+pnpm build:skill  # rebuild the skill CLI and its report page
 ```
 
 Before finishing a change, run `pnpm typecheck`, `pnpm test` and `pnpm build`.
@@ -28,6 +29,7 @@ Before finishing a change, run `pnpm typecheck`, `pnpm test` and `pnpm build`.
 - `src/components/ledger/`: the sheets (`GroupSheet`, `FlowSheet`, `InsuranceSheet`), `Verdict`, `ReportPanel`, `TrendChart`, `Header`, `InfoTip`, `AmountInput`.
 - `src/screens/Ledger.tsx`: desktop two-column page; on mobile, an edit view and a read-only result view. `src/screens/Example.tsx` is the read-only sample.
 - `src/sample.ts`: a fictional household. Keep it fictional.
+- `skills/family-finance-review/`: the Agent Skill. `SKILL.md` and `references/` are hand-written; `scripts/ffr.mjs` is a build artifact from `src/cli/` (commands), `src/lib/snapshot/` (validation and figures, tested) and `src/report/` (the standalone result page, built single-file by `vite.report.config.ts`). After changing any of these, the engine, the i18n strings or the result components, run `pnpm build:skill` and commit the rebuilt `ffr.mjs`. Saved reviews use the `family-finance-review/review@1` file format; changing it needs a new format version and a reader for the old one.
 - `src/lib/import/`: screenshot and text import. The user brings their own API key (Anthropic, or any OpenAI-compatible endpoint), stored only in localStorage under `ffr-ai-settings`, and the browser calls the provider directly; there is no server. `prompt.ts` holds the system prompt and JSON schema, `parse.ts` validates model output (drops zero amounts and other currencies, scrubs card or account numbers from names), `match.ts` proposes update-or-add against the current sheet and applies only the lines the user ticks, and `providers.ts` makes the calls. The UI is `src/components/ledger/ImportDialog.tsx`. Imports always go through the review step; never write model output to the sheet without it. Test fixtures must be synthetic, never taken from real screenshots.
 
 ## Data model rules

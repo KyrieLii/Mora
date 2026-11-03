@@ -5,7 +5,7 @@ import type { ImportLine, Proposal } from './types'
 const normalise = (text: string) => text.toLowerCase().replace(/[\s\-·•_()（）]/g, '')
 
 /** True when one name contains the other once spacing and punctuation are ignored, e.g. "余额宝" and "支付宝 余额宝". */
-function similar(a: string, b: string) {
+export function similar(a: string, b: string) {
   const x = normalise(a)
   const y = normalise(b)
   return x.length > 0 && y.length > 0 && (x.includes(y) || y.includes(x))

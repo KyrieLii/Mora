@@ -30,8 +30,9 @@ interface I18n {
 
 const I18nContext = createContext<I18n>({ locale: 'zh', t: zh, toggle: () => undefined })
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(initialLocale)
+/** `initial` lets a generated report open in the language it was made for; the reader can still switch. */
+export function I18nProvider({ children, initial }: { children: ReactNode; initial?: Locale }) {
+  const [locale, setLocale] = useState<Locale>(() => initial ?? initialLocale())
   active = locale
 
   useEffect(() => {

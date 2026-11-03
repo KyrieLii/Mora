@@ -50,12 +50,14 @@ function FlowRow({
   flow,
   last,
   draft,
+  readOnly,
   onChange,
   onRemove,
 }: {
   flow: FlowItem
   last?: FlowItem
   draft: Snapshot
+  readOnly?: boolean
   onChange: (patch: Partial<FlowItem>) => void
   onRemove: () => void
 }) {
@@ -84,6 +86,7 @@ function FlowRow({
         <div className="grid min-w-0 flex-1 pt-0.5">
           <input
             aria-label={t.common.name}
+            readOnly={readOnly}
             className="w-full min-w-0 rounded-lg bg-transparent px-2 py-1 text-[16px] font-medium text-ellipsis outline-none transition-colors hover:bg-muted/70 focus:bg-muted focus:ring-2 focus:ring-ring/40"
             value={name}
             onChange={(event) => onChange({ name: event.target.value })}
@@ -100,22 +103,24 @@ function FlowRow({
           </span>
         </div>
         <div className="grid justify-items-end">
-          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${name} ${t.sheet.amount}`} className="text-flow" onCommit={(amount) => onChange({ amount })} />
+          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${name} ${t.sheet.amount}`} readOnly={readOnly} className="text-flow" onCommit={(amount) => onChange({ amount })} />
           {last && (
             <span className={cn('px-2 text-[13px] tabular-nums', change === null ? 'text-muted-foreground' : 'font-semibold text-foreground')}>
               {change === null ? t.common.unchanged : t.common.vsLast(signed(change, (value) => shortMoney(value, flow.currency)))}
             </span>
           )}
         </div>
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
-          className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
-          onClick={() => setOpen(!open)}
-        >
-          <ChevronDown className={cn('size-4.5 transition-transform', open && 'rotate-180')} />
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
+            className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
+            onClick={() => setOpen(!open)}
+          >
+            <ChevronDown className={cn('size-4.5 transition-transform', open && 'rotate-180')} />
+          </button>
+        )}
       </div>
       {open && (
         <div className="mx-2 mb-3 grid gap-3 rounded-[1rem] border border-border p-3 text-sm">
@@ -152,7 +157,7 @@ function FlowRow({
 }
 
 /** Income (现金流) or expense (月支出) lines, each with its own frequency, edited like the balance sheet. */
-export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; draft: Snapshot; previous?: Snapshot; onDraft: (patch: Partial<Snapshot>) => void }) {
+export function FlowSheet({ kind, draft, previous, readOnly, onDraft }: { kind: FlowKind; draft: Snapshot; previous?: Snapshot; readOnly?: boolean; onDraft: (patch: Partial<Snapshot>) => void }) {
   const [adding, setAdding] = useState<false | 'pick' | 'custom'>(false)
   const [customName, setCustomName] = useState('')
   const { t } = useI18n()
@@ -192,12 +197,13 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
             flow={flow}
             last={previousById.get(flow.id)}
             draft={draft}
+            readOnly={readOnly}
             onChange={(patch) => update(flow.id, patch)}
             onRemove={() => onDraft({ flows: flows.filter((entry) => entry.id !== flow.id) })}
           />
         ))}
       </ul>
-      <div className="px-2 pt-1">
+      {!readOnly && <div className="px-2 pt-1">
         {adding === 'pick' && (
           <div className="flex flex-wrap gap-2 px-2 py-2">
             {categories
@@ -252,7 +258,7 @@ export function FlowSheet({ kind, draft, previous, onDraft }: { kind: FlowKind; 
             {copy.add}
           </button>
         )}
-      </div>
+      </div>}
     </section>
   )
 }

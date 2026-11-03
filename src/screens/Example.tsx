@@ -1,7 +1,7 @@
 import { Header } from '@/components/ledger/Header'
 import { useI18n } from '@/i18n'
 import { samplePrevious, sampleCurrent, sampleYearAgo } from '../sample'
-import { ResultContent, sides } from './Ledger'
+import { ResultContent, sides } from './ResultContent'
 
 /** A read-only result for a fictional household, so people see what a finished review looks like. */
 export function Example({ onBack }: { onBack: () => void }) {

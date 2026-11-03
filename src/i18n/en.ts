@@ -174,6 +174,12 @@ export const en: Messages = {
 
   example: { link: 'Sample', title: 'Sample results', back: 'Back to my review' },
 
+  standalone: {
+    preview: 'Preview · not saved yet',
+    previewNote: 'Check the lines and results below. If they look right, ask your agent to save them; if not, tell it what to change.',
+    details: 'Details',
+  },
+
   importer: {
     entry: 'Import from screenshot',
     entryHint: 'Paste a bank, broker or wallet screenshot or text, then confirm what was read',

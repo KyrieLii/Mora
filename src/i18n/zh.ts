@@ -175,6 +175,12 @@ export const zh = {
 
   example: { link: '示例', title: '示例结果', back: '回到我的盘点' },
 
+  standalone: {
+    preview: '预览 · 尚未保存',
+    previewNote: '核对下面的明细和结果。没有问题，就在对话里让 Agent 保存；需要修改，也直接告诉它。',
+    details: '明细',
+  },
+
   importer: {
     entry: '截图导入',
     entryHint: '粘贴银行、券商、支付宝截图或文字，识别后由你确认',
