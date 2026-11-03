@@ -2,6 +2,8 @@
 
 English | [简体中文](README.zh-CN.md)
 
+**Try it: [family-finance-review.vercel.app](https://family-finance-review.vercel.app/)** · [sample results](https://family-finance-review.vercel.app/#example)
+
 A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if the main income stopped.
 
 The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.

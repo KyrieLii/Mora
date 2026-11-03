@@ -2,6 +2,8 @@
 
 [English](README.md) | 简体中文
 
+**在线使用：[family-finance-review.vercel.app](https://family-finance-review.vercel.app/)** · [查看示例结果](https://family-finance-review.vercel.app/#example)
+
 一个快速、私密的家庭资产负债盘点工具。每个季度或每年花几分钟，更新家里有什么、欠什么、收入和支出，就能看到净资产、和上次相比的变化，以及主要收入中断后，家里的安全垫有几个月。
 
 产品面向中国城市家庭设计，房产、房贷、公积金、人民币和美元资产并存都是常见情况。
