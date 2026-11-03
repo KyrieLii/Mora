@@ -6,7 +6,13 @@ A quick, private balance-sheet check-up for households. Every quarter or year, u
 
 The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
 
-> Prototype. All data stays in your browser's local storage. Nothing is uploaded and no account is needed.
+> Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser.
+
+There are three ways to use it:
+
+1. **Enter figures by hand** in the web app. No AI needed.
+2. **Import from screenshots or text** in the web app, with your own API key (Anthropic, or any OpenAI-compatible endpoint). You review every line before it is added.
+3. **Ask your AI agent**, through the bundled [Agent Skill](#use-it-from-an-agent). The agent reads your material and the results open as a local HTML page.
 
 ## What it does
 
@@ -15,6 +21,7 @@ The interface is available in Chinese (家庭财务盘点) and English and is bu
 - **Safety cushion (安全垫)**: a month-by-month simulation of how long the household can cover its spending after the main income stops, drawing on cash first and then on investments at a stressed market value.
 - **Trend**: net worth across saved reviews, with change since the last review and since about a year ago.
 - **Two currencies**: RMB and USD, converted at a daily rate. Each saved review keeps the rate it used.
+- **Screenshot and text import**: recognises balances, income and spending from bank, brokerage and payroll screenshots or pasted text, proposes updating existing lines or adding new ones, and applies only the lines you tick. Card and account numbers are removed from names.
 - **Chinese and English**, light and dark themes, and a mobile-first layout: on phones, editing and results are separate pages.
 
 It is not a budgeting app and does not connect to banks. It is a snapshot you update a few times a year.
