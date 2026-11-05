@@ -54,10 +54,10 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 To install it with the [`skills`](https://github.com/vercel-labs/skills) CLI, which detects Claude Code, Codex and other agents and copies the skill into their skills folders:
 
 ```bash
-npx skills add KyrieLii/family-finance-review --skill mora
+npx skills add KyrieLii/Mora --skill mora
 ```
 
-Add `-a claude-code` to install for one agent only, or `-g` to install for your user rather than the current project. You can also download `mora-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`, or copy or link the folder from a clone. See [SKILL.md](skills/mora/SKILL.md) for the workflow and [format.md](skills/mora/references/format.md) for the data format.
+Add `-a claude-code` to install for one agent only, or `-g` to install for your user rather than the current project. You can also download `mora-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/Mora/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`, or copy or link the folder from a clone. See [SKILL.md](skills/mora/SKILL.md) for the workflow and [format.md](skills/mora/references/format.md) for the data format.
 
 ## Getting started
 
@@ -81,7 +81,7 @@ pnpm dev
 
 To host the web app, import the repository in [Vercel](https://vercel.com/new); `vercel.json` sets the build. Or deploy your own copy:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2Ffamily-finance-review)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2FMora)
 
 A hosted copy still keeps every user's data in their own browser. Keys in `.env` are never built into a deployment.
 
@@ -118,6 +118,6 @@ Copyright 2026 Kyrie Li. Licensed under the [GNU Affero General Public License v
 
 You may use, change and share it, including commercially, as long as you follow the AGPL: if you distribute a modified version, or run one as a network service for others, you must make its complete source available under the same license.
 
-If you want to use it in a closed-source product or service without those obligations, a commercial license is available: [open an issue](https://github.com/KyrieLii/family-finance-review/issues) to ask.
+If you want to use it in a closed-source product or service without those obligations, a commercial license is available: [open an issue](https://github.com/KyrieLii/Mora/issues) to ask.
 
 Contributions are welcome. By sending a pull request, you agree that your contribution may be distributed under both the AGPL and the commercial license.

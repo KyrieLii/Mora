@@ -8,9 +8,9 @@
   "homepage": "https://family-finance-review.vercel.app/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KyrieLii/family-finance-review.git"
+    "url": "git+https://github.com/KyrieLii/Mora.git"
   },
-  "bugs": "https://github.com/KyrieLii/family-finance-review/issues",
+  "bugs": "https://github.com/KyrieLii/Mora/issues",
   "keywords": ["personal-finance", "household", "net-worth", "balance-sheet", "agent-skill"],
   "type": "module",
   "packageManager": "pnpm@10.18.3",

@@ -54,10 +54,10 @@ Mora 没有后端。除非你使用需要联网的功能，你填写的数据不
 用 [`skills`](https://github.com/vercel-labs/skills) 命令行工具安装，它会识别 Claude Code、Codex 等 Agent，把 skill 复制到它们的 skills 目录：
 
 ```bash
-npx skills add KyrieLii/family-finance-review --skill mora
+npx skills add KyrieLii/Mora --skill mora
 ```
 
-加 `-a claude-code` 只装给某一个 Agent，加 `-g` 装到用户目录而不是当前项目。也可以从 [Releases](https://github.com/KyrieLii/family-finance-review/releases) 下载 `mora-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`；克隆了仓库的话，直接复制或链接这个文件夹也行。流程见 [SKILL.md](skills/mora/SKILL.md)，数据格式见 [format.md](skills/mora/references/format.md)。
+加 `-a claude-code` 只装给某一个 Agent，加 `-g` 装到用户目录而不是当前项目。也可以从 [Releases](https://github.com/KyrieLii/Mora/releases) 下载 `mora-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`；克隆了仓库的话，直接复制或链接这个文件夹也行。流程见 [SKILL.md](skills/mora/SKILL.md)，数据格式见 [format.md](skills/mora/references/format.md)。
 
 ## 开始使用
 
@@ -81,7 +81,7 @@ pnpm dev
 
 部署网页：在 [Vercel](https://vercel.com/new) 导入这个仓库即可，构建配置在 `vercel.json` 里。也可以一键部署一份自己的：
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2Ffamily-finance-review)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FKyrieLii%2FMora)
 
 部署后的网页仍然把每个人的数据存在他自己的浏览器里。`.env` 里的 Key 不会被打包进部署产物。
 
@@ -118,6 +118,6 @@ Copyright 2026 Kyrie Li。采用 [GNU Affero 通用公共许可证 v3.0](LICENSE
 
 你可以使用、修改和分享，包括商业用途，前提是遵守 AGPL：分发修改后的版本，或者把修改后的版本部署成网络服务给别人用，都必须以同一协议公开完整源码。
 
-如果想在闭源产品或服务里使用，不想承担这些义务，可以向作者购买商业授权：请[提交 issue](https://github.com/KyrieLii/family-finance-review/issues) 联系。
+如果想在闭源产品或服务里使用，不想承担这些义务，可以向作者购买商业授权：请[提交 issue](https://github.com/KyrieLii/Mora/issues) 联系。
 
 欢迎贡献代码。提交 Pull Request 即表示你同意你的贡献可以同时按 AGPL 和商业授权分发。
