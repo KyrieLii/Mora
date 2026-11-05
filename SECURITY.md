@@ -24,6 +24,6 @@ Only the latest release and the `main` branch get fixes.
 
 # 安全问题
 
-Mora会处理家庭财务数据，使用截图导入时还会用到你自己的 AI API Key。发现安全问题，请私下报告。
+Mora 会处理家庭财务数据，使用截图导入时还会用到你自己的 AI API Key。发现安全问题，请私下报告。
 
 在仓库的 **Security** 标签页选择 **Report a vulnerability** 提交。请不要公开提 issue，报告里也不要附真实的财务数据或 API Key。一般一周内会回复。只有最新版本和 `main` 分支会修复。
