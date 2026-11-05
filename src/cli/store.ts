@@ -12,7 +12,12 @@ export interface ReviewFile extends Snapshot {
 }
 
 export function dataDir(flag?: string) {
-  return resolve(flag ?? process.env.FFR_DIR ?? join(homedir(), '.family-finance-review'))
+  const configured = flag ?? process.env.MORA_DIR ?? process.env.FFR_DIR
+  if (configured !== undefined) return resolve(configured)
+
+  const current = join(homedir(), '.mora')
+  const legacy = join(homedir(), '.family-finance-review')
+  return !existsSync(current) && existsSync(legacy) ? legacy : current
 }
 
 export const reviewsDir = (dir: string) => join(dir, 'reviews')

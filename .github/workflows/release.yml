@@ -56,8 +56,8 @@ jobs:
           cat > "$RUNNER_TEMP/notes.md" <<EOF
           ## Downloads
 
-          - **family-finance-review-skill-$GITHUB_REF_NAME.zip**: the Agent Skill. Unzip it into your agent's skills directory, for example \`~/.claude/skills/\`. Needs Node 20 or later.
-          - **family-finance-review-web-$GITHUB_REF_NAME.zip**: the web app as a static site. Serve the folder from the root of a domain with any static file server.
+          - **mora-skill-$GITHUB_REF_NAME.zip**: the Agent Skill. Unzip it into your agent's skills directory, for example \`~/.claude/skills/\`. Needs Node 20 or later.
+          - **mora-web-$GITHUB_REF_NAME.zip**: the web app as a static site. Serve the folder from the root of a domain with any static file server.
           - **SHA256SUMS.txt**: checksums for both archives.
 
           EOF

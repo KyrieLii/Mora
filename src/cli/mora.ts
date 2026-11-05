@@ -14,9 +14,9 @@ import fx from './fallback-fx.json'
 import template from '../../dist-report/report.html?raw'
 import { dataDir, loadReviews, reviewPath, writeReview, writeText } from './store'
 
-const HELP = `ffr: family finance review for agents
+const HELP = `Mora: household finance reviews for agents
 
-Usage: ffr <command> [options]
+Usage: mora <command> [options]
 
 Commands
   categories                 List category ids with Chinese and English names.
@@ -29,7 +29,7 @@ Commands
   fx                         Get the latest USD/CNY reference rate from ${FX_SOURCE_HOST}. The only command that uses the network.
 
 Options
-  --dir <path>      Data folder (default $FFR_DIR or ~/.family-finance-review).
+  --dir <path>      Data folder ($MORA_DIR, then $FFR_DIR, then ~/.mora or the existing legacy folder).
   --lang zh|en      Language of the HTML page (default zh).
   --out <path>      Where to write the HTML page.
   --open            Open the HTML page after writing it.
@@ -85,7 +85,7 @@ function normalize(input: unknown, reviews: Snapshot[]) {
 }
 
 function pick(reviews: Snapshot[], which: string | undefined) {
-  if (reviews.length === 0) fail('No saved reviews yet. Save one first with: ffr save <input.json>')
+  if (reviews.length === 0) fail('No saved reviews yet. Save one first with: mora save <input.json>')
   if (!which || which === 'latest') return reviews.at(-1)!
   return reviews.find((review) => review.date === which) ?? fail(`No saved review for ${which}.`, { saved: reviews.map((review) => review.date) })
 }
@@ -208,7 +208,7 @@ async function main() {
       return latestRate(dir)
 
     default:
-      fail(`Unknown command "${command}". Run ffr --help.`)
+      fail(`Unknown command "${command}". Run mora --help.`)
   }
 }
 

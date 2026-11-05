@@ -8,11 +8,11 @@ export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   ssr: { noExternal: true },
   build: {
-    ssr: fileURLToPath(new URL('./src/cli/ffr.ts', import.meta.url)),
-    outDir: 'skills/family-finance-review/scripts',
+    ssr: fileURLToPath(new URL('./src/cli/mora.ts', import.meta.url)),
+    outDir: 'skills/mora/scripts',
     emptyOutDir: false,
     target: 'node20',
     minify: false,
-    rollupOptions: { output: { entryFileNames: 'ffr.mjs', format: 'es', banner: '#!/usr/bin/env node' } },
+    rollupOptions: { output: { entryFileNames: 'mora.mjs', format: 'es', banner: '#!/usr/bin/env node' } },
   },
 })

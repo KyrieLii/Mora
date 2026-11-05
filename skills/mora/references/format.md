@@ -2,7 +2,7 @@
 
 ## Input (what you write)
 
-A JSON object. Only `items` is required; everything else has a default. Get the valid category ids from `ffr categories`.
+A JSON object. Only `items` is required; everything else has a default. Get the valid category ids from `mora categories`.
 
 ```json
 {
@@ -37,8 +37,8 @@ A JSON object. Only `items` is required; everything else has a default. Get the 
 | `period` | `quarter` | `quarter` or `year`. |
 | `scope` | `family` | `family` or `personal`. |
 | `baseCurrency` | `CNY` | Currency the results are shown in: `CNY` or `USD`. |
-| `usdCny` | previous review's rate, else the bundled rate | Dollars to yuan, e.g. `7.12`. Use the `usdCny` from `ffr fx`. |
-| `fxDate` | `date` when `usdCny` is set | The day the rate was published, `YYYY-MM-DD`: the `fxDate` from `ffr fx`. Ignored without `usdCny`. |
+| `usdCny` | previous review's rate, else the bundled rate | Dollars to yuan, e.g. `7.12`. Use the `usdCny` from `mora fx`. |
+| `fxDate` | `date` when `usdCny` is set | The day the rate was published, `YYYY-MM-DD`: the `fxDate` from `mora fx`. Ignored without `usdCny`. |
 | `items[]` | | Balances: assets and liabilities. |
 | `flows[]` | `[]` | Income and spending lines. The safety cushion requires spending or loan payments. |
 | `insurance[]` | `[]` | Yearly reviews only: any of `life`, `critical`, `medical`, or `none` / `unknown`. |
@@ -51,7 +51,7 @@ Loan repayments belong on the liability as `monthlyPayment`, not as an expense l
 
 ## Saved review files
 
-`ffr save` writes one file per review: `<dir>/reviews/<date>.json`. It is the input after validation, with ids, the exchange-rate date (when not given) and the derived monthly cash flow added:
+`mora save` writes one file per review: `<dir>/reviews/<date>.json`. It is the input after validation, with ids, the exchange-rate date (when not given) and the derived monthly cash flow added:
 
 ```json
 {
@@ -73,7 +73,7 @@ Loan repayments belong on the liability as `monthlyPayment`, not as an expense l
 
 Lines keep the same `id` from one review to the next when the category, currency and name match (a similar name counts), which is how the page shows what changed. Keep names stable between reviews.
 
-To correct a saved review, write a new input for the same date and run `ffr save <file> --replace` after the user confirms.
+To correct a saved review, write a new input for the same date and run `mora save <file> --replace` after the user confirms.
 
 ## Figures (what the CLI returns)
 

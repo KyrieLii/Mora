@@ -16,7 +16,7 @@ function need(path, hint) {
     process.exit(1)
   }
 }
-need('skills/family-finance-review/scripts/ffr.mjs', 'Run pnpm build:skill first.')
+need('skills/mora/scripts/mora.mjs', 'Run pnpm build:skill first.')
 need('dist/index.html', 'Run pnpm build first.')
 
 rmSync(out, { recursive: true, force: true })
@@ -30,16 +30,16 @@ function pack(folder, archive) {
 }
 
 // The skill: unzip into an agent's skills directory as-is.
-const skill = join(stage, 'family-finance-review')
-cpSync(join(root, 'skills/family-finance-review'), skill, { recursive: true })
+const skill = join(stage, 'mora')
+cpSync(join(root, 'skills/mora'), skill, { recursive: true })
 cpSync(join(root, 'LICENSE'), join(skill, 'LICENSE'))
 
 // The web app: a static site that must be served from the root of a domain (it fetches /fx.json).
-const web = join(stage, `family-finance-review-web`)
+const web = join(stage, `mora-web`)
 cpSync(join(root, 'dist'), web, { recursive: true })
 cpSync(join(root, 'LICENSE'), join(web, 'LICENSE'))
 
-const archives = [pack('family-finance-review', `family-finance-review-skill-v${version}.zip`), pack('family-finance-review-web', `family-finance-review-web-v${version}.zip`)]
+const archives = [pack('mora', `mora-skill-v${version}.zip`), pack('mora-web', `mora-web-v${version}.zip`)]
 rmSync(stage, { recursive: true, force: true })
 
 const sums = archives.map((name) => `${createHash('sha256').update(readFileSync(join(out, name))).digest('hex')}  ${name}`)

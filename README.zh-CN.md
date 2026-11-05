@@ -1,8 +1,8 @@
-# 家庭财务盘点
+# Mora
 
 [English](README.md) | 简体中文
 
-**在线使用：[family-finance-review.vercel.app](https://family-finance-review.vercel.app/)** · [查看示例结果](https://family-finance-review.vercel.app/#example)
+**在线使用：[Mora](https://family-finance-review.vercel.app/)** · [查看示例结果](https://family-finance-review.vercel.app/#example)
 
 一个快速、私密的家庭资产负债盘点工具。每个季度或每年花几分钟，更新家里有什么、欠什么、收入和支出，就能看到净资产、和上次相比的变化，以及停止收到收入后，家里的安全垫有几个月。
 
@@ -11,7 +11,7 @@
 > 当前是原型。所有数据只保存在你的浏览器本地，不需要注册账号。使用截图导入时，你选的图片或文字会从浏览器直接发给你自己配置的 AI 服务商，不经过我们的服务器；API Key 只保存在你的浏览器里。点击汇率旁的刷新按钮时，会从 api.frankfurter.dev 获取欧洲央行参考汇率，该网站能看到你的 IP 地址，但收不到你填写的任何内容。
 
 <p align="center">
-  <img src="docs/screenshots/desktop-zh.png" width="62%" alt="桌面端示例结果：净资产、45 个月的安全垫，以及资产负债构成" />
+  <img src="docs/screenshots/desktop-zh.png" width="62%" alt="桌面端示例结果，展示净资产、安全垫和资产负债构成" />
   <img src="docs/screenshots/mobile-zh.png" width="20%" alt="手机深色模式下的同一份示例结果" />
 </p>
 <p align="center"><sub>内置的示例家庭，数据是虚构的。</sub></p>
@@ -36,19 +36,19 @@
 
 ## 在 Agent 里使用
 
-`skills/family-finance-review/` 是一个 [Agent Skill](https://agentskills.io)，给已经在用 Claude Code、Codex 等 AI Agent 的人。Agent 负责看截图和账单、把盘点整理成 JSON，再调用附带的命令行工具（`scripts/ffr.mjs`，Node 20 以上，无依赖）。所有计算都由它完成，用的是和网页同一套引擎。你先在 HTML 预览里核对，在对话里确认后才会保存。
+`skills/mora/` 是一个 [Agent Skill](https://agentskills.io)，给已经在用 Claude Code、Codex 等 AI Agent 的人。Agent 负责看截图和账单、把盘点整理成 JSON，再调用附带的命令行工具（`scripts/mora.mjs`，Node 20 以上，无依赖）。所有计算都由它完成，用的是和网页同一套引擎。你先在 HTML 预览里核对，在对话里确认后才会保存。
 
-- 每次盘点存成一个 JSON 文件：`~/.family-finance-review/reviews/<日期>.json`。任何一次都能重新打开，也能做环比、同比。
+- 每次盘点存成一个 JSON 文件：`~/.mora/reviews/<日期>.json`。任何一次都能重新打开，也能做环比、同比。如果尚无 `~/.mora`，命令行会查找已有的盘点目录。
 - 结果页是单个 HTML 文件，离线可用，不上传任何数据。
-- 命令行工具只有 `ffr fx` 会联网：Agent 用它从 api.frankfurter.dev 获取当天的美元兑人民币汇率。预览和报告均使用盘点录入时的汇率。
+- 命令行工具只有 `mora fx` 会联网：Agent 用它从 api.frankfurter.dev 获取当天的美元兑人民币汇率。预览和报告均使用盘点录入时的汇率。
 
 用 [`skills`](https://github.com/vercel-labs/skills) 命令行工具安装，它会识别 Claude Code、Codex 等 Agent，把 skill 复制到它们的 skills 目录：
 
 ```bash
-npx skills add KyrieLii/family-finance-review --skill family-finance-review
+npx skills add KyrieLii/family-finance-review --skill mora
 ```
 
-加 `-a claude-code` 只装给某一个 Agent，加 `-g` 装到用户目录而不是当前项目。也可以从 [Releases](https://github.com/KyrieLii/family-finance-review/releases) 下载 `family-finance-review-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`；克隆了仓库的话，直接复制或链接这个文件夹也行。流程见 [SKILL.md](skills/family-finance-review/SKILL.md)，数据格式见 [format.md](skills/family-finance-review/references/format.md)。
+加 `-a claude-code` 只装给某一个 Agent，加 `-g` 装到用户目录而不是当前项目。也可以从 [Releases](https://github.com/KyrieLii/family-finance-review/releases) 下载 `mora-skill-<版本>.zip`，解压到 Agent 的 skills 目录，比如 `~/.claude/skills/`；克隆了仓库的话，直接复制或链接这个文件夹也行。流程见 [SKILL.md](skills/mora/SKILL.md)，数据格式见 [format.md](skills/mora/references/format.md)。
 
 ## 开始使用
 
@@ -89,7 +89,7 @@ src/
   components/  盘点界面（各类卡片、结论、报告、趋势图）和用到的 shadcn 组件
   screens/     盘点页（录入与结果）和只读示例页
   report/      skill 命令行工具生成的独立结果页
-  cli/         skill 的命令行工具（打包为 skills/family-finance-review/scripts/ffr.mjs）
+  cli/         skill 的命令行工具（打包为 skills/mora/scripts/mora.mjs）
   sample.ts    示例页使用的虚构家庭数据
 ```
 

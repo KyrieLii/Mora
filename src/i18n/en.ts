@@ -1,7 +1,7 @@
 import type { Messages } from './zh'
 
 export const en: Messages = {
-  appName: 'Family Finance Review',
+  appName: 'Mora',
   groups: { cash: 'Cash', investment: 'Investments', fixed: 'Property & vehicles', restricted: 'Restricted assets', other: 'Other assets', liability: 'Liabilities' },
   groupHints: {
     cash: 'Money you can use right away: deposits, money-market funds, wallet balances',
@@ -118,7 +118,7 @@ export const en: Messages = {
     trendTip: 'MoM compares with the last review; YoY compares with the review about a year ago.',
     cardHeadline: { negative: 'Need a lottery ticket', tight: 'Getting by', moderate: 'Comfortably settled', ample: 'Living well', veryAmple: 'Financial freedom' },
     cardLine: (savings, liquid) => `Saves ${savings} a month · ${liquid} in liquid assets`,
-    cardFooter: (year) => `${year} Family Finance Review`,
+    cardFooter: (year) => `${year} Mora`,
   },
 
   trend: {

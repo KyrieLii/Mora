@@ -1,12 +1,12 @@
-# Family Finance Review
+# Mora
 
 English | [简体中文](README.zh-CN.md)
 
-**Try it: [family-finance-review.vercel.app](https://family-finance-review.vercel.app/)** · [sample results](https://family-finance-review.vercel.app/#example)
+**Try it: [Mora](https://family-finance-review.vercel.app/)** · [sample results](https://family-finance-review.vercel.app/#example)
 
 A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if all income stopped.
 
-The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
+The interface is available in Simplified Chinese and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
 
 > Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser. Tapping refresh next to the exchange rate fetches the ECB reference rate from api.frankfurter.dev, which sees your IP address but nothing you entered.
 
@@ -36,19 +36,19 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 
 ## Use it from an agent
 
-`skills/family-finance-review/` is an [Agent Skill](https://agentskills.io) for people who already work with an AI agent such as Claude Code or Codex. The agent reads your screenshots and statements, writes the review as JSON, and runs the bundled CLI (`scripts/ffr.mjs`, Node 20+, no dependencies), which does every calculation with the same engine as the web app. You check an HTML preview, confirm in chat, and only then is the review saved.
+`skills/mora/` is an [Agent Skill](https://agentskills.io) for people who already work with an AI agent such as Claude Code or Codex. The agent reads your screenshots and statements, writes the review as JSON, and runs the bundled CLI (`scripts/mora.mjs`, Node 20+, no dependencies), which does every calculation with the same engine as the web app. You check an HTML preview, confirm in chat, and only then is the review saved.
 
-- Each review is saved as one JSON file, `~/.family-finance-review/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year.
+- Each review is saved as one JSON file, `~/.mora/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year. The CLI looks for an existing review folder if `~/.mora` does not exist.
 - Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
-- The CLI works offline except `ffr fx`, which the agent runs to get the day's USD/CNY rate from api.frankfurter.dev. Previews and reports use the rate recorded in the review.
+- The CLI works offline except `mora fx`, which the agent runs to get the day's USD/CNY rate from api.frankfurter.dev. Previews and reports use the rate recorded in the review.
 
 To install it with the [`skills`](https://github.com/vercel-labs/skills) CLI, which detects Claude Code, Codex and other agents and copies the skill into their skills folders:
 
 ```bash
-npx skills add KyrieLii/family-finance-review --skill family-finance-review
+npx skills add KyrieLii/family-finance-review --skill mora
 ```
 
-Add `-a claude-code` to install for one agent only, or `-g` to install for your user rather than the current project. You can also download `family-finance-review-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`, or copy or link the folder from a clone. See [SKILL.md](skills/family-finance-review/SKILL.md) for the workflow and [format.md](skills/family-finance-review/references/format.md) for the data format.
+Add `-a claude-code` to install for one agent only, or `-g` to install for your user rather than the current project. You can also download `mora-skill-<version>.zip` from [Releases](https://github.com/KyrieLii/family-finance-review/releases) and unzip it into your agent's skills directory, for example `~/.claude/skills/`, or copy or link the folder from a clone. See [SKILL.md](skills/mora/SKILL.md) for the workflow and [format.md](skills/mora/references/format.md) for the data format.
 
 ## Getting started
 
@@ -89,7 +89,7 @@ src/
   components/  Ledger UI (sheets, verdict, report, trend chart) and the one shadcn primitive in use
   screens/     The review page (edit and result) and the read-only sample
   report/      The standalone result page the skill's CLI writes
-  cli/         The skill's CLI (bundled into skills/family-finance-review/scripts/ffr.mjs)
+  cli/         The skill's CLI (bundled into skills/mora/scripts/mora.mjs)
   sample.ts    A fictional household used by the sample page
 ```
 

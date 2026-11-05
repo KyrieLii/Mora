@@ -37,7 +37,7 @@ jobs:
 
       - run: pnpm build:skill
 
-      # ffr.mjs is committed so the skill works straight from the repo; it must match the source.
+      # mora.mjs is committed so the skill works straight from the repo; it must match the source.
       - name: Check the committed skill bundle is up to date
         run: |
           if ! git diff --quiet -- skills/; then
@@ -72,11 +72,11 @@ jobs:
       # The committed bundle has no dependencies; run it as an agent would.
       - name: Preview and save a sample review
         run: |
-          ffr="node skills/family-finance-review/scripts/ffr.mjs --dir $RUNNER_TEMP/ffr"
+          mora="node skills/mora/scripts/mora.mjs --dir $RUNNER_TEMP/mora"
           echo '{"date":"2026-01-01","items":[{"category":"checking","amount":100000}],"flows":[{"category":"living","amount":8000}]}' > "$RUNNER_TEMP/review.json"
-          $ffr categories > /dev/null
-          $ffr preview "$RUNNER_TEMP/review.json"
-          $ffr save "$RUNNER_TEMP/review.json"
-          $ffr report latest
-          test -s "$RUNNER_TEMP/ffr/reviews/2026-01-01.json"
-          test -s "$RUNNER_TEMP/ffr/reports/2026-01-01.html"
+          $mora categories > /dev/null
+          $mora preview "$RUNNER_TEMP/review.json"
+          $mora save "$RUNNER_TEMP/review.json"
+          $mora report latest
+          test -s "$RUNNER_TEMP/mora/reviews/2026-01-01.json"
+          test -s "$RUNNER_TEMP/mora/reports/2026-01-01.html"

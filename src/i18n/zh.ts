@@ -2,7 +2,7 @@ import type { Frequency, Group, Rating, Scope } from '@/engine'
 
 /** Chinese is the source dictionary; every other locale must match its shape. */
 export const zh = {
-  appName: '家庭财务盘点',
+  appName: 'Mora',
   groups: { cash: '现金类', investment: '投资类', fixed: '固定资产', restricted: '受限资产', other: '其他资产', liability: '负债' } as Record<Group, string>,
   groupHints: {
     cash: '随时能用的钱：存款、余额宝、零钱',
@@ -119,7 +119,7 @@ export const zh = {
     trendTip: '环比对比上次盘点，同比对比约一年前的那次盘点。',
     cardHeadline: { negative: '需要一张彩票', tight: '凑合过吧', moderate: '小富即安', ample: '丰衣足食', veryAmple: '财富自由' },
     cardLine: (savings: string, liquid: string) => `每月能存下 ${savings} · 能较快变现的资产 ${liquid}`,
-    cardFooter: (year: string) => `${year} 家庭财务盘点`,
+    cardFooter: (year: string) => `${year} Mora`,
   },
 
   trend: {
