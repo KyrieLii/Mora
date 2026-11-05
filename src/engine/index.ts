@@ -69,8 +69,10 @@ export interface Item {
   name: string
   amount: number
   currency: Currency
+  /** Legacy flag retained for compatibility with saved snapshots. */
   isEstimate?: boolean
   monthlyPayment?: number
+  /** Legacy mortgage link retained for compatibility with saved snapshots. */
   linkedAssetId?: string
   monthlyRent?: number
 }
@@ -137,6 +139,7 @@ export interface FlowItem {
   amount: number
   currency: Currency
   frequency: Frequency
+  /** Legacy override. Calculations now use the income category. */
   continues?: boolean
 }
 
@@ -159,20 +162,20 @@ export function monthlyEquivalent(flow: FlowItem, base: Currency, usdCny: number
 }
 
 /**
- * Folds income and expense lines into the monthly summary the stress model reads.
- * One-off income (such as a severance payment) arrives as cash when income stops.
+ * Folds income and expense lines into monthly totals. Legacy subtotals remain in saved reviews.
  */
 export function deriveCashflow(flows: FlowItem[], base: Currency, usdCny: number): Cashflow {
   const cashflow: Cashflow = { monthlyIncome: 0, incomeAfterLoss: 0, livingExpense: 0, severance: 0 }
   for (const flow of flows) {
     const monthly = monthlyEquivalent(flow, base, usdCny)
-    if (flowKind(flow.category) === 'expense') {
+    const category = FLOW_CATEGORIES.find((entry) => entry.id === flow.category)
+    if (category?.kind !== 'income') {
       cashflow.livingExpense += monthly
       continue
     }
     if (flow.frequency === 'once') cashflow.severance += toBase(flow.amount, flow.currency, base, usdCny)
     cashflow.monthlyIncome += monthly
-    if (flow.continues) cashflow.incomeAfterLoss += monthly
+    if (category.continues) cashflow.incomeAfterLoss += monthly
   }
   return cashflow
 }
@@ -180,39 +183,13 @@ export function deriveCashflow(flows: FlowItem[], base: Currency, usdCny: number
 /** Turns an older snapshot's four summary numbers into editable lines. */
 export function flowsFromCashflow(cashflow: Cashflow, currency: Currency, makeId: () => string): FlowItem[] {
   const lines: FlowItem[] = []
-  const add = (category: string, name: string, amount: number, frequency: Frequency, continues?: boolean) =>
-    amount > 0 && lines.push({ id: makeId(), category, name, amount, currency, frequency, continues })
-  add('salary', '工资收入', cashflow.monthlyIncome - cashflow.incomeAfterLoss, 'monthly')
-  add('familyIncome', '家人收入', cashflow.incomeAfterLoss, 'monthly', true)
+  const add = (category: string, name: string, amount: number, frequency: Frequency) =>
+    amount > 0 && lines.push({ id: makeId(), category, name, amount, currency, frequency })
+  add('salary', '月薪', cashflow.monthlyIncome - cashflow.incomeAfterLoss, 'monthly')
+  add('familyIncome', '家人收入', cashflow.incomeAfterLoss, 'monthly')
   add('severancePay', '一次性补偿', cashflow.severance, 'once')
   add('living', '生活开销', cashflow.livingExpense, 'monthly')
   return lines
-}
-
-export interface StressParams {
-  stockDrop: number
-  cryptoDrop: number
-  homeDrop: number
-  saleCost: number
-  saleLeadMonths: number
-  rentYield: number
-  expenseCut: number
-  socialSecurityCny: number
-  benefitMonthly: number
-  benefitMonths: number
-}
-
-export const DEFAULT_STRESS: StressParams = {
-  stockDrop: 0.3,
-  cryptoDrop: 0.5,
-  homeDrop: 0.2,
-  saleCost: 0.03,
-  saleLeadMonths: 6,
-  rentYield: 0.02,
-  expenseCut: 0.15,
-  socialSecurityCny: 1500,
-  benefitMonthly: 0,
-  benefitMonths: 12,
 }
 
 export const MAX_MONTHS = 60
@@ -268,98 +245,28 @@ export function summarize(s: Snapshot): BalanceSummary {
   }
 }
 
-interface StressPool {
-  cash: number
-  investments: number
-}
-
-function buildPool(s: Snapshot, p: StressParams, stockDrop: number, estimateScale: number): StressPool {
-  let cash = s.cashflow.severance
-  let investments = 0
-  for (const item of s.items) {
-    const group = groupOf(item.category)
-    const value = itemValue(item, s) * (item.isEstimate ? estimateScale : 1)
-    if (group === 'cash') cash += value
-    if (group === 'investment') investments += value * (1 - (item.category === 'crypto' ? p.cryptoDrop : stockDrop))
-  }
-  return { cash, investments }
-}
-
-function monthlyFlows(s: Snapshot, p: StressParams) {
-  const social = toBase(p.socialSecurityCny, 'CNY', s.baseCurrency, s.usdCny)
-  const debt = s.items.reduce((sum, item) => sum + paymentValue(item, s), 0)
-  const rent = s.items.reduce((sum, item) => sum + rentValue(item, s), 0)
-  const spend = s.cashflow.livingExpense * (1 - p.expenseCut) + debt + social
-  const baseIncome = s.cashflow.incomeAfterLoss + rent
-  const incomeAt = (month: number) => baseIncome + (month <= p.benefitMonths ? p.benefitMonthly : 0)
-  return { spend, incomeAt }
-}
-
-/** Draws one month from the pool and returns the part that could not be funded. */
-function draw(pool: StressPool, gap: number) {
-  const fromCash = Math.min(pool.cash, gap)
-  pool.cash -= fromCash
-  const fromInvestments = Math.min(pool.investments, gap - fromCash)
-  pool.investments -= fromInvestments
-  return { usedInvestments: fromInvestments > 0, unfunded: gap - fromCash - fromInvestments }
-}
-
-export interface StressResult {
-  sustainable: boolean
-  capped: boolean
+export interface SafetyCushion {
   monthsCovered: number
-  exhaustedMonth: number | null
-  sellInvestmentsMonth: number | null
-  firstGap: number
-  laterGap: number
+  cashMonths: number
+  capped: boolean
 }
 
-function runSimulation(s: Snapshot, p: StressParams, estimateScale: number): StressResult {
-  const { spend, incomeAt } = monthlyFlows(s, p)
-  const pool = buildPool(s, p, p.stockDrop, estimateScale)
-  const firstGap = Math.max(0, spend - incomeAt(1))
-  const laterGap = Math.max(0, spend - incomeAt(p.benefitMonths + 1))
-  let sellInvestmentsMonth: number | null = null
-  let exhaustedMonth: number | null = null
-  for (let month = 1; month <= MAX_MONTHS; month++) {
-    const net = incomeAt(month) - spend
-    if (net >= 0) {
-      pool.cash += net
-      continue
-    }
-    const { usedInvestments, unfunded } = draw(pool, -net)
-    if (usedInvestments && sellInvestmentsMonth === null) sellInvestmentsMonth = month
-    if (unfunded > 0) {
-      exhaustedMonth = month
-      break
-    }
+/** Counts full months covered by current cash and investments with no further income. */
+export function calculateCushion(s: Snapshot, summary = summarize(s)): SafetyCushion | null {
+  const monthlySpending = s.cashflow.livingExpense + summary.monthlyDebtPayment
+  if (monthlySpending <= 0) return null
+
+  const coveredMonths = (balance: number) => {
+    const months = Math.min(MAX_MONTHS, balance / monthlySpending)
+    return Math.floor(months + Number.EPSILON * Math.max(1, months))
   }
-  return {
-    sustainable: laterGap === 0,
-    capped: exhaustedMonth === null,
-    monthsCovered: exhaustedMonth === null ? MAX_MONTHS : exhaustedMonth - 1,
-    exhaustedMonth,
-    sellInvestmentsMonth,
-    firstGap,
-    laterGap,
-  }
+  const monthsCovered = coveredMonths(summary.liquidAssets)
+  return { monthsCovered, cashMonths: coveredMonths(summary.byGroup.cash), capped: monthsCovered === MAX_MONTHS }
 }
 
-export function simulate(s: Snapshot, params: Partial<StressParams> = {}): StressResult {
-  return runSimulation(s, { ...DEFAULT_STRESS, ...params }, 1)
-}
-
-/** Estimated items move ±20%, which turns the single answer into a range. */
-export function coverageRange(s: Snapshot, params: Partial<StressParams> = {}) {
-  const p = { ...DEFAULT_STRESS, ...params }
-  const low = runSimulation(s, p, 0.8).monthsCovered
-  const high = runSimulation(s, p, 1.2).monthsCovered
-  return { low, high, isRange: low !== high }
-}
-
-export function ratingOf(result: StressResult): Rating {
-  if (result.sustainable || result.monthsCovered >= 12) return 'ample'
-  return result.monthsCovered >= 6 ? 'moderate' : 'tight'
+export function ratingOf(monthsCovered: number): Rating {
+  if (monthsCovered >= 12) return 'ample'
+  return monthsCovered >= 6 ? 'moderate' : 'tight'
 }
 
 export const RATING_LABELS: Record<Rating, string> = {
@@ -368,87 +275,11 @@ export const RATING_LABELS: Record<Rating, string> = {
   ample: '安全垫充足',
 }
 
-export interface MatrixCell {
-  months: number
-  drop: number
-  shortfall: number
-}
-
-export function scenarioMatrix(
-  s: Snapshot,
-  params: Partial<StressParams> = {},
-  durations = [3, 6, 12, 24],
-  drops = [0, 0.2, 0.3, 0.5],
-): MatrixCell[][] {
-  const p = { ...DEFAULT_STRESS, ...params }
-  const { spend, incomeAt } = monthlyFlows(s, p)
-  return durations.map((months) =>
-    drops.map((drop) => {
-      const pool = buildPool(s, p, drop, 1)
-      let shortfall = 0
-      for (let month = 1; month <= months; month++) {
-        const net = incomeAt(month) - spend
-        if (net >= 0) pool.cash += net
-        else shortfall += draw(pool, -net).unfunded
-      }
-      return { months, drop, shortfall }
-    }),
-  )
-}
-
-export interface PropertyResult {
-  id: string
-  name: string
-  netProceeds: number
-  latestListingMonth: number | null
-  gapAfterSale: number
-  extraMonths: number | null
-  breakEvenDrop: number
-}
-
-export function propertyAnalysis(s: Snapshot, params: Partial<StressParams> = {}): PropertyResult[] {
-  const p = { ...DEFAULT_STRESS, ...params }
-  const stress = runSimulation(s, p, 1)
-  return s.items
-    .filter((item) => item.category === 'home' || item.category === 'rental')
-    .map((property) => {
-      const value = itemValue(property, s)
-      const loans = s.items.filter((item) => item.linkedAssetId === property.id)
-      const balance = loans.reduce((sum, loan) => sum + itemValue(loan, s), 0)
-      const payment = loans.reduce((sum, loan) => sum + paymentValue(loan, s), 0)
-      const netProceeds = value * (1 - p.homeDrop) * (1 - p.saleCost) - balance
-      const newRent = property.category === 'home' ? (value * p.rentYield) / 12 : 0
-      const gapAfterSale = Math.max(0, stress.laterGap - payment - rentValue(property, s) + newRent)
-      const extraMonths = netProceeds <= 0 ? 0 : gapAfterSale === 0 ? null : Math.floor(netProceeds / gapAfterSale)
-      return {
-        id: property.id,
-        name: property.name,
-        netProceeds,
-        latestListingMonth:
-          stress.exhaustedMonth === null ? null : Math.max(1, stress.exhaustedMonth - p.saleLeadMonths),
-        gapAfterSale,
-        extraMonths,
-        breakEvenDrop: value > 0 ? 1 - balance / (value * (1 - p.saleCost)) : 0,
-      }
-    })
-}
-
-/** Ordered by how directly each one shortens the buffer; the report shows the first two. */
-export function insights(s: Snapshot, params: Partial<StressParams> = {}): string[] {
-  const summary = summarize(s)
-  const stress = simulate(s, params)
-  const notes: string[] = []
-  if (stress.firstGap > 0 && summary.byGroup.cash + s.cashflow.severance < stress.firstGap * 3) {
-    notes.push('现金不足以覆盖 3 个月缺口')
-  }
-  if (s.cashflow.incomeAfterLoss === 0) notes.push('主要收入中断后，家庭没有其他工资收入')
-  if (summary.debtRatio >= 0.3) notes.push('还贷已达到税后收入的 30%')
-  if (summary.liquidAssets > 0 && summary.byGroup.investment / summary.liquidAssets > 0.5) {
-    notes.push('流动资产中，股票、基金等投资占比超过一半')
-  }
-  if (summary.totalAssets > 0 && summary.liquidRatio < 0.2) notes.push('流动资产不足总资产的 20%，资产集中在固定资产')
-  if (s.insurance.includes('none') || s.insurance.includes('unknown')) notes.push('主要收入者的保障信息不完整')
-  return notes
+/** Negative net worth takes precedence over the annual card's coverage tiers. */
+export function yearlyHeadlineTier(monthsCovered: number | null, netWorth: number): Rating | 'negative' | 'veryAmple' | null {
+  if (netWorth < 0) return 'negative'
+  if (monthsCovered === null) return null
+  return monthsCovered >= 24 ? 'veryAmple' : ratingOf(monthsCovered)
 }
 
 export interface SnapshotDiff {
@@ -457,21 +288,23 @@ export interface SnapshotDiff {
   fxChange: number
   cashChange: number
   liabilityChange: number
-  monthsCoveredChange: number
+  monthsCoveredChange: number | null
 }
 
-export function diffSnapshots(previous: Snapshot, current: Snapshot, params: Partial<StressParams> = {}): SnapshotDiff {
+export function diffSnapshots(previous: Snapshot, current: Snapshot): SnapshotDiff {
   const before = summarize({ ...previous, baseCurrency: current.baseCurrency })
   const after = summarize(current)
   const atOldRate = summarize({ ...current, usdCny: previous.usdCny })
   const netWorthChange = after.netWorth - before.netWorth
   const fxChange = after.netWorth - atOldRate.netWorth
+  const previousCushion = calculateCushion(previous)
+  const currentCushion = calculateCushion(current, after)
   return {
     netWorthChange,
     balanceChange: netWorthChange - fxChange,
     fxChange,
     cashChange: after.byGroup.cash - before.byGroup.cash,
     liabilityChange: after.totalLiabilities - before.totalLiabilities,
-    monthsCoveredChange: simulate(current, params).monthsCovered - simulate(previous, params).monthsCovered,
+    monthsCoveredChange: currentCushion && previousCushion ? currentCushion.monthsCovered - previousCushion.monthsCovered : null,
   }
 }

@@ -5,7 +5,7 @@ const items: Item[] = [
   { id: 'yeb', category: 'mmf', name: '余额宝', amount: 80000, currency: 'CNY' },
   { id: 'futu', category: 'stock', name: '富途-美股', amount: 28000, currency: 'USD' },
   { id: 'alipay', category: 'fund', name: '支付宝-基金', amount: 180000, currency: 'CNY' },
-  { id: 'home', category: 'home', name: '自住房', amount: 3000000, currency: 'CNY', isEstimate: true },
+  { id: 'home', category: 'home', name: '自住房', amount: 3000000, currency: 'CNY' },
   { id: 'hpf', category: 'hpf', name: '夫妻公积金', amount: 160000, currency: 'CNY' },
   {
     id: 'mortgage',
@@ -14,7 +14,6 @@ const items: Item[] = [
     amount: 1800000,
     currency: 'CNY',
     monthlyPayment: 12000,
-    linkedAssetId: 'home',
   },
   { id: 'card', category: 'creditCard', name: '信用卡待还', amount: 12000, currency: 'CNY' },
 ]

@@ -16,13 +16,13 @@ A JSON object. Only `items` is required; everything else has a default. Get the 
     { "category": "checking", "name": "招行 活期", "amount": 52000, "currency": "CNY" },
     { "category": "mmf", "name": "余额宝", "amount": 18500 },
     { "category": "stock", "name": "富途 美股", "amount": 21000, "currency": "USD" },
-    { "category": "home", "name": "自住房", "amount": 3000000, "isEstimate": true },
+    { "category": "home", "name": "自住房", "amount": 3000000 },
     { "category": "hpf", "name": "公积金", "amount": 160000 },
     { "category": "mortgage", "name": "房贷", "amount": 1180000, "monthlyPayment": 8800 }
   ],
   "flows": [
-    { "category": "salary", "name": "我的工资", "amount": 30000, "frequency": "monthly" },
-    { "category": "familyIncome", "name": "配偶工资", "amount": 15000, "continues": true },
+    { "category": "salary", "name": "月薪", "amount": 30000, "frequency": "monthly" },
+    { "category": "familySalary", "name": "月薪-家人", "amount": 15000 },
     { "category": "yearBonus", "amount": 60000, "frequency": "annual" },
     { "category": "living", "amount": 13500 },
     { "category": "carInsurance", "amount": 5200, "frequency": "annual" }
@@ -40,12 +40,12 @@ A JSON object. Only `items` is required; everything else has a default. Get the 
 | `usdCny` | previous review's rate, else the bundled rate | Dollars to yuan, e.g. `7.12`. Use the `usdCny` from `ffr fx`. |
 | `fxDate` | `date` when `usdCny` is set | The day the rate was published, `YYYY-MM-DD`: the `fxDate` from `ffr fx`. Ignored without `usdCny`. |
 | `items[]` | | Balances: assets and liabilities. |
-| `flows[]` | `[]` | Income and spending lines. Without spending lines the safety cushion cannot be worked out. |
+| `flows[]` | `[]` | Income and spending lines. The safety cushion requires spending or loan payments. |
 | `insurance[]` | `[]` | Yearly reviews only: any of `life`, `critical`, `medical`, or `none` / `unknown`. |
 
-**Items:** `category` (required), `name` (defaults to the category name), `amount` (required, 0 or more; for a liability, the remaining principal or balance owed), `currency` (`CNY` or `USD`, defaults to `baseCurrency`), `isEstimate` (true when the figure is a guess), `monthlyPayment` (liabilities only), `monthlyRent` (`rental` only).
+**Items:** `category` (required), `name` (defaults to the category name), `amount` (required, 0 or more; for a liability, the remaining principal or balance owed), `currency` (`CNY` or `USD`, defaults to `baseCurrency`), `monthlyPayment` (liabilities only), `monthlyRent` (`rental` only).
 
-**Flows:** `category` (required), `name`, `amount` per payment, `currency`, `frequency` (`monthly`, `quarterly`, `annual`, or `once` for one-off income such as severance; defaults to the category's usual frequency), `continues` (income that carries on if the main earner's pay stops, such as a partner's salary or rent).
+**Flows:** `category` (required), `name`, `amount` per payment, `currency`, `frequency` (`monthly`, `quarterly`, `annual`, or `once` for one-off income such as severance; defaults to the category's usual frequency).
 
 Loan repayments belong on the liability as `monthlyPayment`, not as an expense line. Living costs that are not itemised go in `living`.
 
@@ -65,7 +65,7 @@ Loan repayments belong on the liability as `monthlyPayment`, not as an expense l
   "usdCny": 7.12,
   "fxDate": "2026-11-02",
   "items": [{ "id": "…", "category": "checking", "name": "招行 活期", "amount": 52000, "currency": "CNY" }],
-  "flows": [{ "id": "…", "category": "salary", "name": "我的工资", "amount": 30000, "currency": "CNY", "frequency": "monthly" }],
+  "flows": [{ "id": "…", "category": "salary", "name": "月薪", "amount": 30000, "currency": "CNY", "frequency": "monthly" }],
   "insurance": [],
   "cashflow": { "monthlyIncome": 50000, "incomeAfterLoss": 15000, "livingExpense": 13933.33, "severance": 0 }
 }
@@ -82,5 +82,5 @@ To correct a saved review, write a new input for the same date and run `ffr save
 - `netWorth`, `totalAssets`, `totalLiabilities`, `byGroup` (cash, investment, fixed, restricted, other, liability), all in `currency`.
 - `liquidSharePercent`: cash and investments as a share of assets.
 - `monthlyIncome`, `monthlyExpense`, `monthlyDebtPayment`, `monthlySurplus`, `savingsRatePercent`, `debtToIncomePercent`.
-- `safetyCushion`: `months` (a number, or `"60+"`), `range` (low and high months when some figures are estimates), `sustainable` (other income covers spending), `rating` (`tight`, `moderate`, `ample`).
+- `safetyCushion`: full months of recorded spending and loan payments covered by current cash and investment balances, with no future income. `months` is a number, `"60+"`, or `null` when spending and loan payments are zero. `rating` is `tight`, `moderate`, `ample`, or `null`. The legacy fields `range` and `sustainable` are fixed at `null` and `false`.
 - `monthOnMonth` and `yearOnYear`: `netWorthChange`, the part of it caused by the exchange rate (`fromExchangeRate`), and `cushionMonthsChange`, or `null` when there is nothing to compare with.

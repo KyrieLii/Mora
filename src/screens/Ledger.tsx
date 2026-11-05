@@ -2,9 +2,9 @@ import { FlowSheet } from '@/components/ledger/FlowSheet'
 import { GroupSheet } from '@/components/ledger/GroupSheet'
 import { Header } from '@/components/ledger/Header'
 import { InsuranceSheet } from '@/components/ledger/InsuranceSheet'
-import { ReportPanel } from '@/components/ledger/ReportPanel'
+import { ReportPanel, YearlySummary } from '@/components/ledger/ReportPanel'
 import { BufferStrip, Verdict } from '@/components/ledger/Verdict'
-import { GROUPS, simulate, summarize, type Snapshot, type StressParams } from '@/engine'
+import { GROUPS, calculateCushion, summarize, type Snapshot } from '@/engine'
 import { shortMoney } from '@/lib/format'
 import { useMediaQuery } from '@/lib/hooks'
 import { Records, ResultContent, sides } from '@/screens/ResultContent'
@@ -31,7 +31,6 @@ export function Ledger({
   draft,
   previous,
   history,
-  params,
   savedNote,
   headerAside,
   onDraft,
@@ -40,7 +39,6 @@ export function Ledger({
   draft: Snapshot
   previous?: Snapshot
   history: Snapshot[]
-  params: Partial<StressParams>
   savedNote?: string | null
   headerAside?: ReactNode
   onDraft: (patch: Partial<Snapshot>) => void
@@ -54,8 +52,7 @@ export function Ledger({
   const [importOpen, setImportOpen] = useState(false)
   const [importedNote, setImportedNote] = useState<string | null>(null)
   const summary = summarize(draft)
-  const stress = simulate(draft, params)
-  const hasSpending = draft.cashflow.livingExpense > 0 || summary.monthlyDebtPayment > 0
+  const cushion = calculateCushion(draft, summary)
   const hasAmounts = draft.items.some((item) => item.amount > 0)
 
   useEffect(() => {
@@ -137,11 +134,12 @@ export function Ledger({
           {saveButton}
         </main>
         <aside aria-label={t.ledger.aside} className="grid content-start gap-6 pb-8">
+          <YearlySummary draft={draft} />
           {/* Only the verdict stays pinned; the report scrolls with the page. */}
-          <div className="glass-bar pinned-band sticky top-0 z-10 -mx-3 -mt-8 px-3 pt-8 pb-4 [&_section]:bg-(--glass-strong)">
-            <Verdict draft={draft} previous={previous} params={params} />
+          <div className="sticky top-4 z-10 pb-4 [&_section]:bg-(--glass-strong)">
+            <Verdict draft={draft} previous={previous} showRating={false} />
           </div>
-          <ReportPanel draft={draft} previous={previous} history={history} params={params} />
+          <ReportPanel draft={draft} previous={previous} history={history} />
         </aside>
       </div>
     )
@@ -153,7 +151,7 @@ export function Ledger({
         <main className="grid gap-5 pt-[max(20px,calc(env(safe-area-inset-top,0px)+12px))]">
           <Header draft={draft} title={t.ledger.resultTitle} back={{ label: t.ledger.backToEdit, onClick: () => setView('edit') }} />
           {notice}
-          <ResultContent draft={draft} previous={previous} history={history} params={params} />
+          <ResultContent draft={draft} previous={previous} history={history} />
         </main>
         <Dock>{saveButton}</Dock>
       </div>
@@ -172,16 +170,16 @@ export function Ledger({
       >
         <div className="flex items-baseline justify-between text-[15px] font-bold tabular-nums">
           <span>{t.ledger.barNetWorth(shortMoney(summary.netWorth, draft.baseCurrency))}</span>
-          {hasSpending && <span>{stress.sustainable ? t.ledger.barSustainable : t.ledger.barCushion(stress.capped ? '60+' : String(stress.monthsCovered))}</span>}
+          {cushion && <span>{t.ledger.barCushion(cushion.capped ? '60+' : String(cushion.monthsCovered))}</span>}
         </div>
-        {hasSpending && <BufferStrip draft={draft} params={params} compact />}
+        {cushion && <BufferStrip stress={cushion} compact />}
       </div>
 
       <main className="grid gap-5 pt-[max(20px,calc(env(safe-area-inset-top,0px)+12px))]">
         {header}
         {notice}
         <div ref={verdictRef}>
-          <Verdict draft={draft} previous={previous} params={params} />
+          <Verdict draft={draft} previous={previous} showRating={false} />
         </div>
         {sheets}
       </main>

@@ -4,14 +4,14 @@ English | [简体中文](README.zh-CN.md)
 
 **Try it: [family-finance-review.vercel.app](https://family-finance-review.vercel.app/)** · [sample results](https://family-finance-review.vercel.app/#example)
 
-A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if the main income stopped.
+A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if all income stopped.
 
 The interface is available in Chinese (家庭财务盘点) and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
 
 > Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser. Tapping refresh next to the exchange rate fetches the ECB reference rate from api.frankfurter.dev, which sees your IP address but nothing you entered.
 
 <p align="center">
-  <img src="docs/screenshots/desktop-en.png" width="62%" alt="Sample results on desktop: net worth, a 45-month safety cushion, and the asset and liability breakdown" />
+  <img src="docs/screenshots/desktop-en.png" width="62%" alt="Sample results on desktop: net worth, the safety cushion, and the asset and liability breakdown" />
   <img src="docs/screenshots/mobile-en.png" width="20%" alt="The same sample results on a phone in dark mode" />
 </p>
 <p align="center"><sub>The built-in sample household, which is fictional.</sub></p>
@@ -26,7 +26,7 @@ There are three ways to use it:
 
 - **Balance sheet**: cash, investments, property, restricted assets (such as the housing provident fund), other assets and liabilities. Add as many accounts as you like, or create custom items.
 - **Cash flow**: income (salary, bonuses, one-off compensation) and expenses (rent, insurance, subscriptions), each with its own frequency. Everything is converted to a monthly figure.
-- **Safety cushion (安全垫)**: a month-by-month simulation of how long the household can cover its spending after the main income stops, drawing on cash first and then on investments at a stressed market value.
+- **Safety cushion (安全垫)**: the number of full months current cash and investment balances can cover recorded spending and loan payments if all income stops.
 - **Trend**: net worth across saved reviews, with change since the last review and since about a year ago.
 - **Two currencies**: RMB and USD, converted at a daily rate. Each saved review keeps the rate it used.
 - **Screenshot and text import**: recognises balances, income and spending from bank, brokerage and payroll screenshots or pasted text, proposes updating existing lines or adding new ones, and applies only the lines you tick. Card and account numbers are removed from names.
@@ -84,7 +84,7 @@ To use screenshot import in `pnpm dev` without typing a key, copy `.env.example`
 
 ```text
 src/
-  engine/      Pure, deterministic calculation: balance sheet, cash flow, safety-cushion simulation
+  engine/      Pure, deterministic calculation: balance sheet, cash flow, safety cushion
   lib/         Formatting, local storage and migration, theme, icons
   components/  Ledger UI (sheets, verdict, report, trend chart) and the one shadcn primitive in use
   screens/     The review page (edit and result) and the read-only sample
@@ -101,7 +101,7 @@ React, Vite, TypeScript, Tailwind CSS v4, Radix (via shadcn/ui), lucide icons, V
 
 ## Disclaimer
 
-This tool runs scenarios only. It is not investment, legal or real-estate advice. Default assumptions (market drop, cost of living after job loss, and so on) are product assumptions and have not been calibrated against real data.
+The safety cushion is calculated from the balances and expenses entered. This tool does not provide investment, legal or real-estate advice.
 
 ## License
 

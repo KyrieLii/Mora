@@ -1,16 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
-  coverageRange,
   deriveCashflow,
   flowsFromCashflow,
   diffSnapshots,
-  insights,
-  propertyAnalysis,
-  ratingOf,
-  scenarioMatrix,
-  simulate,
+  calculateCushion,
   summarize,
   toBase,
+  yearlyHeadlineTier,
   type Snapshot,
 } from './index'
 
@@ -40,9 +36,6 @@ const snapshot = (overrides: Partial<Snapshot> = {}): Snapshot => ({
   ],
   ...overrides,
 })
-
-// The expense cut is 12% so living costs match the 13,200 used in the worked example.
-const example = { expenseCut: 0.12, benefitMonthly: 2000 }
 
 describe('summarize', () => {
   it('builds the balance sheet and ratios', () => {
@@ -86,109 +79,61 @@ describe('summarize', () => {
   })
 })
 
-describe('simulate', () => {
-  it('reproduces the single-income example', () => {
-    const result = simulate(snapshot(), example)
-    expect(result.firstGap).toBe(9700)
-    expect(result.laterGap).toBe(11700)
-    expect(result.sellInvestmentsMonth).toBe(21)
-    expect(result.exhaustedMonth).toBe(32)
-    expect(result.monthsCovered).toBe(31)
+describe('calculateCushion', () => {
+  it('uses current cash and investments to cover recorded expenses and loan payments', () => {
+    expect(calculateCushion(snapshot())).toEqual({ monthsCovered: 12, cashMonths: 5, capped: false })
   })
 
-  it('reproduces the two-income loss example', () => {
-    const s = snapshot({
-      cashflow: { monthlyIncome: 45000, incomeAfterLoss: 0, livingExpense: 15000, severance: 90000 },
-    })
-    const result = simulate(s, { ...example, benefitMonthly: 4000, socialSecurityCny: 3000 })
-    expect(result.firstGap).toBe(24200)
-    expect(result.laterGap).toBe(28200)
-    expect(result.sellInvestmentsMonth).toBe(10)
-    expect(result.exhaustedMonth).toBe(16)
-  })
-
-  it('reports households that income can still cover', () => {
-    const s = snapshot({ cashflow: { monthlyIncome: 45000, incomeAfterLoss: 40000, livingExpense: 15000, severance: 0 } })
-    const result = simulate(s)
-    expect(result.sustainable).toBe(true)
-    expect(ratingOf(result)).toBe('ample')
-  })
-
-  it('caps long coverage at the simulation limit', () => {
-    const rich = snapshot()
-    rich.items[0].amount = 50000000
-    const result = simulate(rich)
-    expect(result.capped).toBe(true)
-    expect(result.monthsCovered).toBe(60)
-  })
-
-  it('includes crypto at its own drop', () => {
-    const s = snapshot({
-      cashflow: { monthlyIncome: 45000, incomeAfterLoss: 0, livingExpense: 15000, severance: 60000 },
-      items: [{ id: 'c', category: 'crypto', name: 'BTC', amount: 100000, currency: 'CNY' }],
-    })
-    const result = simulate(s, { cryptoDrop: 0.5, stockDrop: 0 })
-    expect(result.monthsCovered).toBe(Math.floor((50000 + 60000) / result.firstGap))
-  })
-})
-
-describe('coverageRange', () => {
-  it('is exact when nothing is estimated', () => {
-    expect(coverageRange(snapshot()).isRange).toBe(false)
-  })
-
-  it('widens when an amount is estimated', () => {
-    const s = snapshot()
-    s.items[0].isEstimate = true
-    const range = coverageRange(s)
-    expect(range.isRange).toBe(true)
-    expect(range.low).toBeLessThan(range.high)
-  })
-})
-
-describe('scenarioMatrix', () => {
-  it('reports the shortfall for a failing cell', () => {
-    const s = snapshot({ items: [{ id: 'c', category: 'checking', name: '存款', amount: 1000, currency: 'CNY' }] })
-    s.cashflow = { monthlyIncome: 0, incomeAfterLoss: 0, livingExpense: 10000, severance: 0 }
-    const [cell] = scenarioMatrix(s, { expenseCut: 0, socialSecurityCny: 0 }, [3], [0])[0]!.slice(0, 1)
-    expect(cell!.shortfall).toBe(29000)
-  })
-})
-
-describe('propertyAnalysis', () => {
-  const twoIncomeLoss = () =>
-    snapshot({ cashflow: { monthlyIncome: 45000, incomeAfterLoss: 0, livingExpense: 15000, severance: 90000 } })
-  const params = { ...example, benefitMonthly: 4000, socialSecurityCny: 3000 }
-
-  it('computes proceeds, deadline and extension', () => {
-    const [home] = propertyAnalysis(twoIncomeLoss(), params)
-    expect(home!.netProceeds).toBeCloseTo(528000)
-    expect(home!.latestListingMonth).toBe(10)
-    expect(home!.gapAfterSale).toBeCloseTo(21200)
-    expect(home!.extraMonths).toBe(24)
-    expect(home!.breakEvenDrop).toBeCloseTo(0.381, 3)
-  })
-
-  it('adds no months when the sale leaves nothing', () => {
-    const [home] = propertyAnalysis(twoIncomeLoss(), { ...params, homeDrop: 0.4 })
-    expect(home!.netProceeds).toBeCloseTo(-54000)
-    expect(home!.extraMonths).toBe(0)
-  })
-})
-
-describe('insights', () => {
-  it('flags the household weak points', () => {
-    const s = snapshot({
-      insurance: ['none'],
-      cashflow: { monthlyIncome: 30000, incomeAfterLoss: 0, livingExpense: 15000, severance: 0 },
+  it('ignores all future income, including rent and one-off compensation', () => {
+    const draft = snapshot({
       items: [
-        { id: 'a', category: 'checking', name: '存款', amount: 20000, currency: 'CNY' },
-        { id: 'b', category: 'stock', name: '股票', amount: 80000, currency: 'CNY' },
-        { id: 'c', category: 'home', name: '自住房', amount: 3000000, currency: 'CNY' },
-        { id: 'd', category: 'mortgage', name: '房贷', amount: 1000000, currency: 'CNY', monthlyPayment: 12000 },
+        { id: 'cash', category: 'checking', name: 'Cash', amount: 12000, currency: 'CNY' },
+        { id: 'stock', category: 'stock', name: 'Stock', amount: 3000, currency: 'USD' },
+        { id: 'rent', category: 'rental', name: 'Rental', amount: 100000, currency: 'CNY', monthlyRent: 10000 },
+        { id: 'loan', category: 'mortgage', name: 'Loan', amount: 50000, currency: 'CNY', monthlyPayment: 2000 },
       ],
+      cashflow: { monthlyIncome: 30000, incomeAfterLoss: 10000, livingExpense: 6000, severance: 40000 },
     })
-    expect(insights(s)).toHaveLength(6)
+    expect(calculateCushion(draft)).toEqual({ monthsCovered: 4, cashMonths: 1, capped: false })
+  })
+
+  it('counts loan-only spending and distinguishes zero coverage from missing spending', () => {
+    const cashflow = { monthlyIncome: 0, incomeAfterLoss: 0, livingExpense: 0, severance: 0 }
+    expect(calculateCushion(snapshot({ items: [], cashflow }))).toBeNull()
+    const loan = { id: 'loan', category: 'mortgage', name: 'Loan', amount: 10000, currency: 'CNY' as const, monthlyPayment: 1000 }
+    expect(calculateCushion(snapshot({ items: [loan], cashflow }))).toEqual({ monthsCovered: 0, cashMonths: 0, capped: false })
+  })
+
+  it('keeps the display limit at sixty months', () => {
+    const draft = snapshot()
+    draft.items[0].amount = 50000000
+    expect(calculateCushion(draft)).toEqual({ monthsCovered: 60, cashMonths: 60, capped: true })
+  })
+
+  it('does not lose a full month to decimal arithmetic', () => {
+    const draft = snapshot({
+      items: [{ id: 'cash', category: 'checking', name: 'Cash', amount: 0.3, currency: 'CNY' }],
+      cashflow: { monthlyIncome: 0, incomeAfterLoss: 0, livingExpense: 0.1, severance: 0 },
+    })
+    expect(calculateCushion(draft)?.monthsCovered).toBe(3)
+  })
+})
+
+describe('legacy estimate flags', () => {
+  it('uses the same balances and safety cushion with or without the old flag', () => {
+    const original = snapshot()
+    const estimated = snapshot({ items: original.items.map((item) => ({ ...item, isEstimate: true })) })
+    expect(summarize(estimated)).toEqual(summarize(original))
+    expect(calculateCushion(estimated)).toEqual(calculateCushion(original))
+  })
+})
+
+describe('legacy property links', () => {
+  it('includes loan payments in the safety cushion regardless of the old property link', () => {
+    const linked = snapshot()
+    const unlinked = snapshot({ items: linked.items.map((item) => ({ ...item, linkedAssetId: undefined })) })
+    expect(summarize(linked).monthlyDebtPayment).toBe(12000)
+    expect(calculateCushion(linked)).toEqual(calculateCushion(unlinked))
   })
 })
 
@@ -208,10 +153,10 @@ describe('flows', () => {
   it('folds income and expense lines into the monthly summary', () => {
     const result = deriveCashflow(
       [
-        { id: '1', category: 'salary', name: '工资', amount: 30000, currency: 'CNY', frequency: 'monthly' },
+        { id: '1', category: 'salary', name: '工资', amount: 30000, currency: 'CNY', frequency: 'monthly', continues: true },
         { id: '2', category: 'yearBonus', name: '年终奖', amount: 120000, currency: 'CNY', frequency: 'annual' },
-        { id: '3', category: 'familyIncome', name: '配偶', amount: 1000, currency: 'USD', frequency: 'monthly', continues: true },
-        { id: '4', category: 'severancePay', name: '补偿', amount: 60000, currency: 'CNY', frequency: 'once' },
+        { id: '3', category: 'familySalary', name: '配偶', amount: 1000, currency: 'USD', frequency: 'monthly', continues: false },
+        { id: '4', category: 'severancePay', name: '补偿', amount: 60000, currency: 'CNY', frequency: 'once', continues: true },
         { id: '5', category: 'living', name: '生活', amount: 12000, currency: 'CNY', frequency: 'monthly' },
         { id: '6', category: 'carInsurance', name: '车险', amount: 6000, currency: 'CNY', frequency: 'annual' },
       ],
@@ -231,4 +176,27 @@ describe('flows', () => {
     expect(flows).toHaveLength(4)
     expect(deriveCashflow(flows, 'CNY', 7)).toEqual(cashflow)
   })
+})
+
+describe('yearly headline tier', () => {
+  it.each([
+    [0, 'tight'],
+    [2, 'tight'],
+    [3, 'tight'],
+    [5, 'tight'],
+    [6, 'moderate'],
+    [11, 'moderate'],
+    [12, 'ample'],
+    [23, 'ample'],
+    [24, 'veryAmple'],
+  ])('classifies %i months as %s', (monthsCovered, tier) => {
+    expect(yearlyHeadlineTier(monthsCovered, 0)).toBe(tier)
+  })
+
+  it('uses the negative headline regardless of available spending data or coverage', () => {
+    expect(yearlyHeadlineTier(60, -1)).toBe('negative')
+    expect(yearlyHeadlineTier(null, -1)).toBe('negative')
+    expect(yearlyHeadlineTier(null, 0)).toBeNull()
+  })
+
 })

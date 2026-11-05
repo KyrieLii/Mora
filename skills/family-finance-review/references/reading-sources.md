@@ -47,4 +47,4 @@ Never write card or account numbers or their last digits, phone or ID numbers, o
 
 ## When unsure
 
-If a figure is unreadable, cut off, or could be either a total or a part, ask the user. If they give a rough figure, record it with `"isEstimate": true`.
+If a figure is unreadable, cut off, or could be either a total or a part, ask the user. If they give a rough figure, use the amount they provide.

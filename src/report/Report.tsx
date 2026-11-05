@@ -97,7 +97,7 @@ export function Report({ payload }: { payload: ReportPayload }) {
           <Details draft={draft} previous={previous} />
         </main>
         <aside className="grid content-start gap-6 pb-8">
-          <ResultContent draft={draft} previous={previous} history={history} params={{}} />
+          <ResultContent draft={draft} previous={previous} history={history} />
         </aside>
       </div>
     )
@@ -108,7 +108,7 @@ export function Report({ payload }: { payload: ReportPayload }) {
       <main className="grid gap-5 pt-[max(20px,calc(env(safe-area-inset-top,0px)+12px))]">
         {header}
         {notice}
-        <ResultContent draft={draft} previous={previous} history={history} params={{}} />
+        <ResultContent draft={draft} previous={previous} history={history} />
         <Details draft={draft} previous={previous} />
       </main>
     </div>

@@ -10,7 +10,7 @@ export function Example({ onBack }: { onBack: () => void }) {
     <div className="mx-auto w-full max-w-xl pb-10" style={sides}>
       <main className="grid gap-5 pt-[max(20px,calc(env(safe-area-inset-top,0px)+12px))]">
         <Header draft={sampleCurrent} title={t.example.title} back={{ label: t.example.back, onClick: onBack }} />
-        <ResultContent draft={sampleCurrent} previous={samplePrevious} history={[sampleYearAgo, samplePrevious]} params={{}} />
+        <ResultContent draft={sampleCurrent} previous={samplePrevious} history={[sampleYearAgo, samplePrevious]} />
       </main>
     </div>
   )

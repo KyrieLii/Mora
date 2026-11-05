@@ -21,7 +21,7 @@ export function loadStored(): Stored | null {
     if (!stored || stored.isSample) return null
     // Older drafts kept four summary numbers; turn them into editable income and expense lines.
     if (!stored.draft.flows) stored.draft.flows = flowsFromCashflow(stored.draft.cashflow, stored.draft.baseCurrency, () => crypto.randomUUID())
-    return stored
+    return { ...stored, draft: withDerivedCashflow(stored.draft), history: stored.history.map(withDerivedCashflow) }
   } catch {
     return null
   }
@@ -56,7 +56,6 @@ export function newFlow(category: string, currency: Snapshot['baseCurrency'], na
     amount: 0,
     currency,
     frequency: def?.frequency ?? 'monthly',
-    continues: def?.continues,
   }
 }
 

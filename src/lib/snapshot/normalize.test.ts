@@ -63,6 +63,21 @@ describe('normalizeSnapshot', () => {
 })
 
 describe('digest', () => {
+  it('calculates coverage when loan payments are the only monthly spending', () => {
+    const { snapshot, warnings } = normalizeSnapshot({ items: input.items }, options)
+    expect(warnings).toEqual([])
+    expect(digest(snapshot!).safetyCushion.months).toBe(20)
+  })
+
+  it('returns no cushion or month-over-month change without monthly spending', () => {
+    const previous = normalizeSnapshot(input, options).snapshot!
+    const { snapshot, warnings } = normalizeSnapshot({ items: input.items.slice(0, 2) }, options)
+    expect(warnings).toContain('Enter monthly spending or loan payments to calculate the safety cushion.')
+    const result = digest(snapshot!, previous)
+    expect(result.safetyCushion).toMatchObject({ months: null, rating: null })
+    expect(result.sincePrevious?.cushionMonthsChange).toBeNull()
+  })
+
   it('summarises a review and its change since the previous one', () => {
     const first = normalizeSnapshot(input, options).snapshot!
     const second = normalizeSnapshot({ ...input, items: [{ category: 'checking', name: '活期', amount: 70000 }, ...input.items.slice(1)] }, { ...options, previous: first }).snapshot!

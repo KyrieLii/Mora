@@ -1,5 +1,5 @@
 import { useI18n } from '@/i18n'
-import { ratingOf, simulate, summarize, type Snapshot, type StressParams } from '@/engine'
+import { calculateCushion, summarize, yearlyHeadlineTier, type Snapshot } from '@/engine'
 import { percent, shortMoney } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
@@ -34,14 +34,12 @@ function Rows({ rows, tone }: { rows: ([string, string] | [string, string, strin
   )
 }
 
-/** Read-only results: structure, trend and the yearly card. */
-export function ReportPanel({ draft, previous, history, params }: { draft: Snapshot; previous?: Snapshot; history: Snapshot[]; params: Partial<StressParams> }) {
+/** Read-only asset structure and trend. */
+export function ReportPanel({ draft, previous, history }: { draft: Snapshot; previous?: Snapshot; history: Snapshot[] }) {
   const { t } = useI18n()
   const currency = draft.baseCurrency
   const short = (value: number) => shortMoney(value, currency)
   const summary = summarize(draft)
-  const stress = simulate(draft, params)
-  const hasSpending = draft.cashflow.livingExpense > 0 || summary.monthlyDebtPayment > 0
   const total = Math.max(summary.totalAssets, 1)
   const parts = [
     { label: t.report.parts.cash, value: summary.byGroup.cash, tone: 'bg-asset' },
@@ -101,19 +99,28 @@ export function ReportPanel({ draft, previous, history, params }: { draft: Snaps
       <Section title={t.report.trendTitle} tip={t.report.trendTip}>
         <TrendChart draft={draft} previous={previous} history={history} />
       </Section>
+    </div>
+  )
+}
 
-      {draft.period === 'year' && hasSpending && (
-        <Section title={t.report.cardTitle} tip={t.report.cardTip}>
-          <div className="liquid-action grid gap-3 rounded-[1.375rem] p-5">
-            <span className="text-[28px] font-extrabold">{t.rating[ratingOf(stress)]}</span>
-            <span className="text-[15px]">
-              {t.report.cardLine(percent(summary.savingsRate), percent(summary.liquidRatio))}
-            </span>
-            <span className="text-[13px] opacity-80">{t.report.cardFooter(draft.date.slice(0, 4))}</span>
-          </div>
-        </Section>
+export function YearlySummary({ draft }: { draft: Snapshot }) {
+  const { t } = useI18n()
+  if (draft.period !== 'year') return null
+  const summary = summarize(draft)
+  if (summary.totalAssets === 0 && summary.totalLiabilities === 0) return null
+  const cushion = calculateCushion(draft, summary)
+  const tier = yearlyHeadlineTier(cushion?.monthsCovered ?? null, summary.netWorth)
+  if (!tier) return null
+
+  return (
+    <div className="liquid-action grid gap-3 rounded-[1.375rem] p-5">
+      <span className="text-[28px] font-extrabold">{t.report.cardHeadline[tier]}</span>
+      {cushion && (
+        <span className="text-[15px]">
+          {t.report.cardLine(percent(summary.savingsRate), percent(summary.liquidRatio))}
+        </span>
       )}
-
+      <span className="text-[13px] opacity-80">{t.report.cardFooter(draft.date.slice(0, 4))}</span>
     </div>
   )
 }

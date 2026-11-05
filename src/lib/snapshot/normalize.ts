@@ -93,7 +93,6 @@ export function normalizeSnapshot(
     const name = (typeof entry.name === 'string' && entry.name.trim()) || def.label
     if (/\d{6,}/.test(name.replace(/\s/g, ''))) warnings.push(`${where}: the name contains a long number; remove card or account numbers.`)
     const item: Item = { id: '', category: def.id, name, amount: entry.amount, currency }
-    if (entry.isEstimate) item.isEstimate = true
     if (def.group === 'liability' && isNumber(entry.monthlyPayment) && entry.monthlyPayment > 0) item.monthlyPayment = entry.monthlyPayment
     if (def.id === 'rental' && isNumber(entry.monthlyRent) && entry.monthlyRent > 0) item.monthlyRent = entry.monthlyRent
     item.id = idFrom(item, previous?.items ?? [], takenItems, newId)
@@ -117,8 +116,6 @@ export function normalizeSnapshot(
     if (!FREQUENCIES.includes(frequency)) return errors.push(`${where}: frequency must be one of ${FREQUENCIES.join(', ')}.`)
     if (def.kind === 'expense' && frequency === 'once') return errors.push(`${where}: expenses cannot be one-off; use monthly, quarterly or annual.`)
     const flow: FlowItem = { id: '', category: def.id, name: (typeof entry.name === 'string' && entry.name.trim()) || def.label, amount: entry.amount, currency, frequency }
-    const continues = entry.continues ?? def.continues
-    if (def.kind === 'income' && continues) flow.continues = true
     flow.id = idFrom(flow, previous?.flows ?? [], takenFlows, newId)
     flows.push(flow)
   })
@@ -130,9 +127,10 @@ export function normalizeSnapshot(
   })
 
   if (items.length === 0 && errors.length === 0) errors.push('There are no balance items; add at least one asset or liability.')
-  if (!flows.some((flow) => FLOW_CATEGORIES.find((category) => category.id === flow.category)?.kind === 'expense'))
-    warnings.push('There are no expense lines, so the safety cushion cannot be worked out.')
   if (errors.length > 0) return { snapshot: null, errors, warnings }
+  const cashflow = deriveCashflow(flows, baseCurrency, usdCny)
+  if (cashflow.livingExpense <= 0 && !items.some((item) => item.monthlyPayment))
+    warnings.push('Enter monthly spending or loan payments to calculate the safety cushion.')
 
   const snapshot: Snapshot = {
     id: newId(),
@@ -145,7 +143,7 @@ export function normalizeSnapshot(
     items,
     flows,
     insurance,
-    cashflow: deriveCashflow(flows, baseCurrency, usdCny),
+    cashflow,
   }
   return { snapshot, errors, warnings }
 }

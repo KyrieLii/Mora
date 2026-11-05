@@ -188,13 +188,6 @@
       inset 0 1px 0 oklch(1 0 0 / 0.5),
       0 12px 30px -14px var(--glass-shadow);
   }
-  /* The frosted band behind the pinned desktop verdict fades out on every side but the top. */
-  .pinned-band {
-    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent), linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent), linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
-    mask-composite: intersect;
-  }
   .glass-bar {
     background: var(--glass-strong);
     backdrop-filter: blur(24px) saturate(180%);
