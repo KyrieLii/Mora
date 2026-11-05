@@ -1,7 +1,7 @@
 {
   "name": "mora",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A quick, private household balance-sheet review: net worth, cash flow and safety cushion, in the browser or from your AI agent.",
   "license": "AGPL-3.0-only",
   "author": "Kyrie Li (https://github.com/KyrieLii)",
