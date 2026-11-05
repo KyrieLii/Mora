@@ -1,32 +1,35 @@
-import { Switch } from '@/components/ui/switch'
-import { CATEGORIES, toBase, type Currency, type Group, type Item, type Snapshot } from '@/engine'
+import { CATEGORIES, toBase, type Group, type Item, type Snapshot } from '@/engine'
 import { useI18n } from '@/i18n'
 import { displayName } from '@/i18n/names'
 import { money, shortMoney, signed } from '@/lib/format'
 import { categoryIcon, GROUP_ICONS } from '@/lib/icons'
 import { newItem } from '@/lib/store'
 import { cn } from '@/lib/utils'
-import { ChevronDown, PenLine, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { PenLine, Plus } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { AmountInput } from './AmountInput'
 import { InfoTip } from './InfoTip'
+import { RowActions } from './RowActions'
 
-export function Segmented<T extends string>({ value, options, label, onChange }: { value: T; options: [T, string][]; label: string; onChange: (value: T) => void }) {
+export function Segmented<T extends string>({ value, options, label, onChange }: { value: T; options: [T, string, ReactNode?][]; label: string; onChange: (value: T) => void }) {
   return (
     <div role="radiogroup" aria-label={label} className="glass-capsule inline-flex rounded-full p-0.5">
-      {options.map(([id, text]) => (
+      {options.map(([id, text, icon]) => (
         <button
           key={id}
           type="button"
           role="radio"
           aria-checked={value === id}
+          aria-label={icon ? text : undefined}
+          title={icon ? text : undefined}
           className={cn(
             'h-8 min-w-11 rounded-full px-3 text-sm font-semibold transition-colors',
+            icon && 'grid size-11 place-items-center px-0',
             value === id ? 'bg-popover text-foreground shadow-[0_1px_3px_oklch(0.3_0.04_200/0.16)]' : 'text-muted-foreground hover:text-foreground',
           )}
           onClick={() => onChange(id)}
         >
-          {text}
+          {icon ?? text}
         </button>
       ))}
     </div>
@@ -37,7 +40,6 @@ function ItemRow({
   item,
   last,
   draft,
-  properties,
   readOnly,
   tile,
   onChange,
@@ -47,23 +49,22 @@ function ItemRow({
   item: Item
   last?: Item
   draft: Snapshot
-  properties: Item[]
   readOnly?: boolean
   onChange: (patch: Partial<Item>) => void
   onRemove: () => void
 }) {
-  const [open, setOpen] = useState(false)
   const { t } = useI18n()
-  const isLiability = CATEGORIES.find((entry) => entry.id === item.category)?.group === 'liability'
   const categoryDef = CATEGORIES.find((entry) => entry.id === item.category)
+  const isLiability = categoryDef?.group === 'liability'
+  const showPayment = isLiability && !readOnly
+  const debtInput = 'h-10 w-[4.75rem] px-1.5 max-[359px]:w-16 max-[359px]:placeholder:text-[13px] sm:w-32'
   const category = t.categories[item.category] ?? categoryDef?.label ?? ''
   const name = displayName(t, item, 'categories')
   const change = last && last.currency === item.currency && last.amount !== item.amount ? item.amount - last.amount : null
   const Icon = categoryIcon(item.category)
   const note = [
     !categoryDef?.generic && category !== name ? category : '',
-    item.isEstimate ? t.sheet.estimate : '',
-    item.monthlyPayment ? t.sheet.monthlyPaymentNote(shortMoney(item.monthlyPayment, item.currency)) : '',
+    !showPayment && item.monthlyPayment ? t.sheet.monthlyPaymentNote(shortMoney(item.monthlyPayment, item.currency)) : '',
     item.monthlyRent ? t.sheet.monthlyRentNote(shortMoney(item.monthlyRent, item.currency)) : '',
     item.currency !== draft.baseCurrency && item.amount
       ? `≈ ${shortMoney(toBase(item.amount, item.currency, draft.baseCurrency, draft.usdCny), draft.baseCurrency)}`
@@ -72,29 +73,46 @@ function ItemRow({
 
   return (
     <li className="px-2">
-      <div className="flex items-start gap-1 py-2">
-        <span className={cn('mt-0.5 ml-1.5 grid size-8 shrink-0 place-items-center rounded-[0.7rem]', tile)} aria-hidden="true">
+      <div className={cn('flex items-start py-2', readOnly && 'gap-1')}>
+        <span className={cn('ml-1.5 grid shrink-0 place-items-center rounded-[0.7rem]', readOnly ? 'mt-0.5 size-8' : 'mt-2 size-7', showPayment && 'max-sm:hidden', tile)} aria-hidden="true">
           <Icon className="size-4" />
         </span>
-        <div className="grid min-w-0 flex-1 pt-0.5">
+        <div className={cn('grid min-w-0 flex-1', readOnly ? 'pt-0.5' : 'pt-1.5')}>
           <input
             aria-label={t.common.name}
             readOnly={readOnly}
-            className="w-full min-w-0 text-ellipsis rounded-lg bg-transparent px-2 py-1 text-[16px] font-medium outline-none transition-colors hover:bg-muted/70 focus:bg-muted focus:ring-2 focus:ring-ring/40"
+            className={cn('w-full min-w-0 text-ellipsis rounded-lg bg-transparent py-1 text-[16px] font-medium outline-none transition-colors hover:bg-muted/70 focus:bg-muted focus:ring-2 focus:ring-ring/40', readOnly ? 'px-2' : 'px-1.5')}
             value={name}
             onChange={(event) => onChange({ name: event.target.value })}
             onBlur={(event) => !event.target.value.trim() && onChange({ name: category })}
           />
           {note.length > 0 && <span className="px-2 text-[13px] text-muted-foreground">{note.join(' · ')}</span>}
         </div>
-        <div className="grid justify-items-end">
+        {showPayment && (
+          <>
+            <div className="grid min-w-0 justify-items-end pt-0.5">
+              <AmountInput
+                id={`payment-${item.id}`}
+                value={item.monthlyPayment ?? 0}
+                currency={item.currency}
+                label={`${name} ${t.sheet.monthlyPayment}`}
+                placeholder={t.sheet.monthlyPaymentShort}
+                className={debtInput}
+                onCommit={(monthlyPayment) => onChange({ monthlyPayment })}
+              />
+            </div>
+            <span aria-hidden="true" className="mx-1.5 mt-4 h-3 w-px shrink-0 bg-muted-foreground/35" />
+          </>
+        )}
+        <div className={cn('grid min-w-0 justify-items-end', !readOnly && 'pt-0.5')}>
           <AmountInput
             id={`amount-${item.id}`}
             value={item.amount}
             currency={item.currency}
             label={`${name} ${isLiability ? t.sheet.balance : t.sheet.amount}`}
             readOnly={readOnly}
-            className={cn(item.isEstimate && 'underline decoration-dotted decoration-2 underline-offset-[5px]')}
+            placeholder={showPayment ? t.sheet.balance : undefined}
+            className={cn(!readOnly && 'h-10 px-1.5', showPayment && debtInput)}
             onCommit={(amount) => onChange({ amount })}
           />
           {last && (
@@ -103,64 +121,12 @@ function ItemRow({
             </span>
           )}
         </div>
-        {!readOnly && (
-          <button
-            type="button"
-            aria-expanded={open}
-            aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
-            className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
-            onClick={() => setOpen(!open)}
-          >
-            <ChevronDown className={cn('size-4.5 transition-transform', open && 'rotate-180')} />
-          </button>
-        )}
+        {!readOnly && <RowActions currency={item.currency} onCurrencyChange={(currency) => onChange({ currency })} onRemove={onRemove} />}
       </div>
-      {open && (
-        <div className="mx-2 mb-3 grid gap-3 rounded-[1rem] border border-border p-3 text-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">{t.common.currency}</span>
-            <Segmented value={item.currency} label={t.common.currency} options={[['CNY', t.common.cny], ['USD', t.common.usd]]} onChange={(currency: Currency) => onChange({ currency })} />
-          </div>
-          <label className="flex items-center justify-between gap-3">
-            <span className="flex items-center text-muted-foreground">
-              {t.sheet.estimateLabel}
-              <InfoTip label={t.sheet.estimate}>{t.sheet.estimateTip}</InfoTip>
-            </span>
-            <Switch checked={!!item.isEstimate} onCheckedChange={(checked) => onChange({ isEstimate: checked })} />
-          </label>
-          {isLiability && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">{t.sheet.monthlyPayment}</span>
-              <AmountInput id={`payment-${item.id}`} value={item.monthlyPayment ?? 0} currency={item.currency} label={`${name} ${t.sheet.monthlyPayment}`} onCommit={(monthlyPayment) => onChange({ monthlyPayment })} />
-            </div>
-          )}
-          {isLiability && properties.length > 0 && (
-            <label className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">{t.sheet.linkedProperty}</span>
-              <select
-                className="h-9 max-w-44 rounded-full border bg-popover px-3 text-sm"
-                value={item.linkedAssetId ?? ''}
-                onChange={(event) => onChange({ linkedAssetId: event.target.value || undefined })}
-              >
-                <option value="">{t.sheet.noLink}</option>
-                {properties.map((property) => (
-                  <option key={property.id} value={property.id}>
-                    {displayName(t, property, 'categories')}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {item.category === 'rental' && (
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground">{t.sheet.monthlyRent}</span>
-              <AmountInput id={`rent-${item.id}`} value={item.monthlyRent ?? 0} currency={item.currency} label={`${name} ${t.sheet.monthlyRent}`} onCommit={(monthlyRent) => onChange({ monthlyRent })} />
-            </div>
-          )}
-          <button type="button" className="flex items-center gap-1.5 justify-self-start rounded-full px-2 py-1 font-semibold text-destructive hover:bg-destructive/10" onClick={onRemove}>
-            <Trash2 className="size-4" />
-            {t.common.remove}
-          </button>
+      {!readOnly && item.category === 'rental' && (
+        <div className="mx-3 mb-2 flex items-center justify-between gap-3 border-t border-border pt-1 text-sm">
+          <span className="text-muted-foreground">{t.sheet.monthlyRent}</span>
+          <AmountInput id={`rent-${item.id}`} value={item.monthlyRent ?? 0} currency={item.currency} label={`${name} ${t.sheet.monthlyRent}`} onCommit={(monthlyRent) => onChange({ monthlyRent })} />
         </div>
       )}
     </li>
@@ -190,12 +156,11 @@ export function GroupSheet({
   const items = draft.items.filter((item) => categories.some((entry) => entry.id === item.category))
   const total = items.reduce((sum, item) => sum + toBase(item.amount, item.currency, draft.baseCurrency, draft.usdCny), 0)
   const previousById = new Map(previous?.items.map((item) => [item.id, item]))
-  const properties = draft.items.filter((item) => CATEGORIES.find((entry) => entry.id === item.category)?.group === 'fixed')
 
   const update = (id: string, patch: Partial<Item>) =>
     onDraft({ items: draft.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) })
 
-  const choices = categories.filter((entry) => !entry.generic)
+  const choices = categories.filter((entry) => !entry.generic && !entry.legacy)
   const genericId = categories.find((entry) => entry.generic)!.id
 
   const add = (category: string, name?: string) => {
@@ -226,7 +191,6 @@ export function GroupSheet({
             item={item}
             last={previousById.get(item.id)}
             draft={draft}
-            properties={properties}
             readOnly={readOnly}
             tile={tint.tile}
             onChange={(patch) => update(item.id, patch)}

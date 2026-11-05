@@ -1,7 +1,6 @@
-import { Switch } from '@/components/ui/switch'
 import { useI18n } from '@/i18n'
 import { displayName } from '@/i18n/names'
-import { FLOW_CATEGORIES, monthlyEquivalent, type Currency, type FlowItem, type FlowKind, type Frequency, type Snapshot } from '@/engine'
+import { FLOW_CATEGORIES, monthlyEquivalent, type FlowItem, type FlowKind, type Frequency, type Snapshot } from '@/engine'
 import { money, shortMoney, signed } from '@/lib/format'
 import { newFlow } from '@/lib/store'
 import { cn } from '@/lib/utils'
@@ -9,7 +8,6 @@ import {
   Briefcase,
   Building,
   Car,
-  ChevronDown,
   CircleDollarSign,
   Gift,
   GraduationCap,
@@ -22,16 +20,16 @@ import {
   Repeat,
   ShieldPlus,
   ShoppingBasket,
-  Trash2,
   Users,
 } from 'lucide-react'
 import { useState } from 'react'
 import { AmountInput } from './AmountInput'
-import { Segmented } from './GroupSheet'
 import { InfoTip } from './InfoTip'
+import { ROW_CONTROL, RowActions } from './RowActions'
 
 const ICONS: Record<string, LucideIcon> = {
   salary: Briefcase,
+  familySalary: Briefcase,
   quarterBonus: Gift,
   yearBonus: Gift,
   severancePay: HandCoins,
@@ -45,6 +43,9 @@ const ICONS: Record<string, LucideIcon> = {
   education: GraduationCap,
   expenseOther: Receipt,
 }
+
+const EXPENSE_FREQUENCIES: Frequency[] = ['monthly', 'quarterly', 'annual']
+const INCOME_FREQUENCIES: Frequency[] = [...EXPENSE_FREQUENCIES, 'once']
 
 function FlowRow({
   flow,
@@ -61,29 +62,30 @@ function FlowRow({
   onChange: (patch: Partial<FlowItem>) => void
   onRemove: () => void
 }) {
-  const [open, setOpen] = useState(false)
   const { t } = useI18n()
   const def = FLOW_CATEGORIES.find((entry) => entry.id === flow.category)
   const label = t.flowCategories[flow.category] ?? def?.label ?? ''
   const name = displayName(t, flow, 'flowCategories')
   const Icon = ICONS[flow.category] ?? CircleDollarSign
   const isIncome = def?.kind !== 'expense'
+  const frequencies = isIncome ? INCOME_FREQUENCIES : EXPENSE_FREQUENCIES
+  const nextFrequency = frequencies[(frequencies.indexOf(flow.frequency) + 1) % frequencies.length]!
+  const frequencyLabel = t.flows.switchFrequency(t.frequency[flow.frequency], t.frequency[nextFrequency])
   const perMonth = monthlyEquivalent(flow, draft.baseCurrency, draft.usdCny)
   const change = last && last.currency === flow.currency && last.amount !== flow.amount ? flow.amount - last.amount : null
   const note = [
     !def?.generic && label !== name && flow.frequency !== 'once' ? label : '',
-    t.frequency[flow.frequency],
+    readOnly ? t.frequency[flow.frequency] : '',
     flow.frequency !== 'monthly' && flow.frequency !== 'once' && flow.amount ? t.common.approxPerMonth(shortMoney(perMonth, draft.baseCurrency)) : '',
-    isIncome && flow.continues && flow.frequency !== 'once' ? t.flows.continuing : '',
   ].filter(Boolean)
 
   return (
     <li className="px-2">
-      <div className="flex items-start gap-1 py-2">
-        <span className="mt-0.5 ml-1.5 grid size-8 shrink-0 place-items-center rounded-[0.7rem] bg-flow-soft text-flow" aria-hidden="true">
+      <div className={cn('flex items-start py-2', readOnly && 'gap-1')}>
+        <span className={cn('ml-1.5 grid shrink-0 place-items-center rounded-[0.7rem] bg-flow-soft text-flow', readOnly ? 'mt-0.5 size-8' : 'mt-2 size-7 max-[359px]:hidden')} aria-hidden="true">
           <Icon className="size-4" />
         </span>
-        <div className="grid min-w-0 flex-1 pt-0.5">
+        <div className={cn('grid min-w-0 flex-1', readOnly ? 'pt-0.5' : 'pt-1.5')}>
           <input
             aria-label={t.common.name}
             readOnly={readOnly}
@@ -93,17 +95,17 @@ function FlowRow({
             onBlur={(event) => !event.target.value.trim() && onChange({ name: label })}
           />
           {/* Each separator rides at the end of the segment before it, so a wrapped line never starts with a dot. */}
-          <span className="flex flex-wrap gap-x-1 px-2 text-[13px] text-muted-foreground">
+          {note.length > 0 && <span className="flex flex-wrap gap-x-1 px-2 text-[13px] text-muted-foreground">
             {note.map((part, index) => (
               <span key={part} className="whitespace-nowrap">
                 {part}
                 {index < note.length - 1 && ' ·'}
               </span>
             ))}
-          </span>
+          </span>}
         </div>
-        <div className="grid justify-items-end">
-          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${name} ${t.sheet.amount}`} readOnly={readOnly} className="text-flow" onCommit={(amount) => onChange({ amount })} />
+        <div className={cn('grid min-w-0 justify-items-end', !readOnly && 'pt-0.5')}>
+          <AmountInput id={`flow-${flow.id}`} value={flow.amount} currency={flow.currency} label={`${name} ${t.sheet.amount}`} readOnly={readOnly} className={cn('text-flow', !readOnly && 'h-10 w-24 px-1.5 max-[359px]:w-20 sm:w-36')} onCommit={(amount) => onChange({ amount })} />
           {last && (
             <span className={cn('px-2 text-[13px] tabular-nums', change === null ? 'text-muted-foreground' : 'font-semibold text-foreground')}>
               {change === null ? t.common.unchanged : t.common.vsLast(signed(change, (value) => shortMoney(value, flow.currency)))}
@@ -111,47 +113,20 @@ function FlowRow({
           )}
         </div>
         {!readOnly && (
-          <button
-            type="button"
-            aria-expanded={open}
-            aria-label={open ? t.common.collapse(name) : t.common.expand(name)}
-            className="relative mt-0.5 -ml-1 grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors after:absolute after:-inset-1.5 hover:bg-muted hover:text-foreground"
-            onClick={() => setOpen(!open)}
-          >
-            <ChevronDown className={cn('size-4.5 transition-transform', open && 'rotate-180')} />
-          </button>
+          <RowActions currency={flow.currency} onCurrencyChange={(currency) => onChange({ currency })} onRemove={onRemove}>
+            <button
+              type="button"
+              className={cn(ROW_CONTROL, 'text-sm font-semibold')}
+              aria-label={frequencyLabel}
+              title={frequencyLabel}
+              onClick={() => onChange({ frequency: nextFrequency })}
+            >
+              {t.flows.frequencyShort[flow.frequency]}
+            </button>
+          </RowActions>
         )}
       </div>
-      {open && (
-        <div className="mx-2 mb-3 grid gap-3 rounded-[1rem] border border-border p-3 text-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">{t.flows.frequency}</span>
-            <Segmented
-              value={flow.frequency}
-              label={t.flows.frequency}
-              options={(isIncome ? ['monthly', 'quarterly', 'annual', 'once'] : ['monthly', 'quarterly', 'annual']).map((id) => [id as Frequency, t.frequency[id as Frequency]])}
-              onChange={(frequency: Frequency) => onChange({ frequency })}
-            />
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-muted-foreground">{t.common.currency}</span>
-            <Segmented value={flow.currency} label={t.common.currency} options={[['CNY', t.common.cny], ['USD', t.common.usd]]} onChange={(currency: Currency) => onChange({ currency })} />
-          </div>
-          {isIncome && flow.frequency !== 'once' && (
-            <label className="flex items-center justify-between gap-3">
-              <span className="flex items-center text-muted-foreground">
-                {t.flows.continuesLabel}
-                <InfoTip label={t.flows.continuesLabel}>{t.flows.continuesTip}</InfoTip>
-              </span>
-              <Switch checked={!!flow.continues} onCheckedChange={(checked) => onChange({ continues: checked })} />
-            </label>
-          )}
-          <button type="button" className="flex items-center gap-1.5 justify-self-start rounded-full px-2 py-1 font-semibold text-destructive hover:bg-destructive/10" onClick={onRemove}>
-            <Trash2 className="size-4" />
-            {t.common.remove}
-          </button>
-        </div>
-      )}
+
     </li>
   )
 }
@@ -207,7 +182,7 @@ export function FlowSheet({ kind, draft, previous, readOnly, onDraft }: { kind: 
         {adding === 'pick' && (
           <div className="flex flex-wrap gap-2 px-2 py-2">
             {categories
-              .filter((entry) => !entry.generic)
+              .filter((entry) => !entry.generic && !entry.legacy)
               .map((category) => (
                 <button key={category.id} type="button" className="glass-capsule h-9 rounded-full px-3.5 text-sm font-semibold transition-colors hover:bg-action hover:text-action-foreground" onClick={() => add(category.id)}>
                   {t.flowCategories[category.id] ?? category.label}

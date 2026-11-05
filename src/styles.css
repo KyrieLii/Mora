@@ -178,6 +178,10 @@
   .glass-asset { --tint: var(--asset-soft); --tint-rim: var(--asset); }
   .glass-liability { --tint: var(--liability-soft); --tint-rim: var(--liability); }
   .glass-flow { --tint: var(--flow-soft); --tint-rim: var(--flow); }
+  :is(.glass-asset, .glass-liability, .glass-flow) input {
+    --ring: var(--tint-rim);
+    caret-color: var(--ring);
+  }
   /* A floating capsule: thinner fill so content stays legibly blurred beneath it. */
   .glass-capsule {
     background: var(--glass);
