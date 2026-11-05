@@ -1,3 +1,5 @@
+import claudeMark from '@/assets/claude.svg'
+import openaiMark from '@/assets/openai.svg'
 import { AmountInput } from '@/components/ledger/AmountInput'
 import { Segmented } from '@/components/ledger/GroupSheet'
 import { InfoTip } from '@/components/ledger/InfoTip'
@@ -88,7 +90,15 @@ function SettingsStep({ settings, onSave, onBack, onError }: { settings: AiSetti
       <p className="text-[15px] leading-relaxed text-muted-foreground">{s.intro}</p>
       <div className="flex items-center justify-between gap-3">
         <span className="text-[13px] font-semibold text-muted-foreground">{s.provider}</span>
-        <Segmented label={s.provider} value={form.provider} options={[['anthropic', s.anthropic], ['openai', s.openai]]} onChange={switchProvider} />
+        <Segmented
+          label={s.provider}
+          value={form.provider}
+          options={[
+            ['anthropic', s.anthropic, <img src={claudeMark} alt="" className="size-5 dark:invert" />],
+            ['openai', s.openai, <img src={openaiMark} alt="" className="size-5 dark:invert" />],
+          ]}
+          onChange={switchProvider}
+        />
       </div>
       {form.provider === 'openai' && <p className="-mt-2 text-[13px] leading-relaxed text-muted-foreground">{s.openaiHint}</p>}
       <div className="grid gap-1.5">
