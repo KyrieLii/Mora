@@ -39,7 +39,7 @@ export function InfoTip({ label, children }: { label: string; children: ReactNod
           sideOffset={6}
           collisionPadding={12}
           onOpenAutoFocus={(event) => event.preventDefault()}
-          className="glass z-50 max-w-[16rem] rounded-xl bg-(--glass-strong) px-3 py-2 text-[13px] leading-relaxed font-normal text-foreground data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+          className="z-50 max-w-[16rem] rounded-xl border border-border bg-popover px-3 py-2 text-[13px] leading-relaxed font-normal text-popover-foreground shadow-[0_12px_30px_-12px_var(--glass-shadow)]"
         >
           {children}
         </Popover.Content>

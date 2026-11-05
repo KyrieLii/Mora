@@ -131,32 +131,32 @@ export function Header({ draft, title, back, aside, onDraft }: { draft: Snapshot
           {back.label}
         </button>
       )}
-      <div className="flex items-start justify-between gap-3">
-        <div className="grid min-w-0 gap-1.5">
-          <h1 className="text-[28px] leading-tight font-extrabold tracking-[-0.02em]">{title}</h1>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted-foreground">
-            {onDraft ? (
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-label={t.header.settings(summary)}
-                className="glass-capsule flex h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold text-foreground"
-                onClick={() => setOpen(!open)}
-              >
-                {summary}
-                <ChevronDown className={cn('size-3.5 text-muted-foreground transition-transform', open && 'rotate-180')} />
-              </button>
-            ) : (
-              <span className="font-semibold text-foreground">{summary}</span>
-            )}
-            <span>{draft.date}</span>
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2 pt-1">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5">
+        <h1 className="text-[28px] leading-tight font-extrabold tracking-[-0.02em]">{title}</h1>
+        <div className="flex items-center gap-2 pt-1">
           {aside}
           <LanguageToggle />
           <ThemeToggle />
         </div>
+        <div className="flex min-w-0 items-center self-center text-[13px]">
+          {onDraft ? (
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-label={t.header.settings(summary)}
+              className="glass-capsule flex min-h-8 items-center gap-1 rounded-full px-3 text-left font-semibold text-foreground"
+              onClick={() => setOpen(!open)}
+            >
+              {summary}
+              <ChevronDown className={cn('size-3.5 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} />
+            </button>
+          ) : (
+            <span className="font-semibold text-foreground">{summary}</span>
+          )}
+        </div>
+        <time dateTime={draft.date} className="justify-self-end self-center text-[13px] whitespace-nowrap text-muted-foreground tabular-nums">
+          {draft.date}
+        </time>
       </div>
       {open && onDraft && (
         <div className="glass grid gap-3 rounded-[1.375rem] p-4">
