@@ -10,6 +10,8 @@ export interface CategoryDef {
   group: Group
   /** The catch-all category a user-named item is filed under. */
   generic?: boolean
+  /** An older category kept for reading saved reviews. */
+  legacy?: boolean
 }
 
 export const GROUPS: { id: Group; label: string }[] = [
@@ -23,9 +25,11 @@ export const GROUPS: { id: Group; label: string }[] = [
 
 export const CATEGORIES: CategoryDef[] = [
   { id: 'checking', label: '银行存款', group: 'cash' },
-  { id: 'wallet', label: '微信支付宝余额', group: 'cash' },
+  { id: 'wechatBalance', label: '微信零钱', group: 'cash' },
+  { id: 'alipayBalance', label: '支付宝余额', group: 'cash' },
+  { id: 'wallet', label: '微信支付宝余额', group: 'cash', legacy: true },
   { id: 'mmf', label: '货币基金', group: 'cash' },
-  { id: 'deposit', label: '定期存款', group: 'cash' },
+  { id: 'deposit', label: '定期存款', group: 'cash', legacy: true },
   { id: 'cashOther', label: '其他现金', group: 'cash', generic: true },
   { id: 'stock', label: '股票', group: 'investment' },
   { id: 'fund', label: '基金', group: 'investment' },
@@ -104,15 +108,17 @@ export interface FlowCategoryDef {
   frequency: Frequency
   /** Income that keeps arriving after the main earner's pay stops. */
   continues?: boolean
+  legacy?: boolean
   generic?: boolean
 }
 
 export const FLOW_CATEGORIES: FlowCategoryDef[] = [
-  { id: 'salary', label: '工资收入', kind: 'income', frequency: 'monthly' },
+  { id: 'salary', label: '月薪', kind: 'income', frequency: 'monthly' },
+  { id: 'familySalary', label: '月薪-家人', kind: 'income', frequency: 'monthly', continues: true },
   { id: 'quarterBonus', label: '季度奖金', kind: 'income', frequency: 'quarterly' },
   { id: 'yearBonus', label: '年终奖', kind: 'income', frequency: 'annual' },
   { id: 'severancePay', label: '一次性补偿', kind: 'income', frequency: 'once' },
-  { id: 'familyIncome', label: '家人收入', kind: 'income', frequency: 'monthly', continues: true },
+  { id: 'familyIncome', label: '家人收入', kind: 'income', frequency: 'monthly', continues: true, legacy: true },
   { id: 'incomeOther', label: '其他收入', kind: 'income', frequency: 'monthly', generic: true },
   { id: 'living', label: '生活开销', kind: 'expense', frequency: 'monthly' },
   { id: 'rent', label: '房租', kind: 'expense', frequency: 'monthly' },

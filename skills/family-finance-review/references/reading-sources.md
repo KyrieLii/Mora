@@ -6,7 +6,7 @@ Most sources are screenshots of Chinese bank, brokerage, payment and payroll app
 
 - Balances the household owns: deposits, wallet balances (微信零钱, 支付宝余额), money-market funds (余额宝, 零钱通), time deposits, funds, stocks, bonds and wealth products, crypto, housing provident fund (公积金), pensions.
 - Debts: mortgages, car loans, consumer loans, credit-card balances. The amount is the remaining principal or the statement balance; note the monthly repayment when shown.
-- Income (salary slips, bonus notices) and spending (rent, insurance, subscriptions, bills) with how often they are paid.
+- Income (salary slips, bonus notices) and spending (rent, insurance, subscriptions, bills) with how often they are paid. Use `salary` for the main earner’s salary and `familySalary` for a family member’s salary.
 
 ## Avoid double counting
 
@@ -23,9 +23,10 @@ Daily or yesterday's returns, profit and loss, percentages, buying power, withdr
 | Source | Category |
 |---|---|
 | 银行活期, 储蓄卡 | `checking` |
-| 微信零钱, 支付宝余额 | `wallet` |
+| 微信零钱 | `wechatBalance` |
+| 支付宝余额 | `alipayBalance` |
 | 余额宝, 零钱通, other money-market funds | `mmf` |
-| 定期, 大额存单 | `deposit` |
+| 定期, 大额存单 | `cashOther` |
 | Brokerage account (A-shares, HK, US) | `stock` |
 | Fund holdings (基金) | `fund` |
 | 银行理财, bonds | `bond` |

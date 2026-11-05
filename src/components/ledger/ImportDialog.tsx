@@ -261,7 +261,7 @@ function CategorySelect({ value, onChange }: { value: string; onChange: (categor
     <select aria-label={t.importer.categoryLabel} className={cn(FIELD, 'h-9 w-0 min-w-[8.5rem] flex-1 truncate rounded-full py-0 pr-8 text-[14px] font-semibold')} value={value} onChange={(event) => onChange(event.target.value)}>
       {GROUPS.map((group) => (
         <optgroup key={group.id} label={t.groups[group.id]}>
-          {CATEGORIES.filter((entry) => entry.group === group.id).map((entry) => (
+          {CATEGORIES.filter((entry) => entry.group === group.id && (!entry.legacy || entry.id === value)).map((entry) => (
             <option key={entry.id} value={entry.id}>
               {t.categories[entry.id]}
             </option>
@@ -270,7 +270,7 @@ function CategorySelect({ value, onChange }: { value: string; onChange: (categor
       ))}
       {(['income', 'expense'] as const).map((kind) => (
         <optgroup key={kind} label={t.importer.kinds[kind]}>
-          {FLOW_CATEGORIES.filter((entry) => entry.kind === kind).map((entry) => (
+          {FLOW_CATEGORIES.filter((entry) => entry.kind === kind && (!entry.legacy || entry.id === value)).map((entry) => (
             <option key={entry.id} value={entry.id}>
               {t.flowCategories[entry.id]}
             </option>

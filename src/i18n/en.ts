@@ -9,10 +9,10 @@ export const en: Messages = {
     fixed: 'Home, parking space, car, at what they would sell for today',
     restricted: 'Housing fund and pensions: counted in net worth, not in the safety cushion',
     other: 'Money lent out, company equity and similar',
-    liability: 'What you owe: enter the remaining principal; expand a row for the monthly payment',
+    liability: 'What you owe: enter the monthly payment and outstanding balance',
   },
   categories: {
-    checking: 'Bank deposit', wallet: 'WeChat / Alipay balance', mmf: 'Money-market fund', deposit: 'Time deposit', cashOther: 'Other cash',
+    checking: 'Bank deposit', wechatBalance: 'WeChat balance', alipayBalance: 'Alipay balance', wallet: 'WeChat / Alipay balance', mmf: 'Money-market fund', deposit: 'Time deposit', cashOther: 'Other cash',
     stock: 'Stocks', fund: 'Funds', bond: 'Bonds & wealth products', crypto: 'Crypto', investOther: 'Other investment',
     home: 'Home', rental: 'Rental property', parking: 'Parking space', car: 'Car', fixedOther: 'Other property',
     hpf: 'Housing provident fund', pension: 'Private pension', policy: 'Policy cash value', restrictedOther: 'Other restricted asset',
@@ -20,7 +20,7 @@ export const en: Messages = {
     mortgage: 'Mortgage', carLoan: 'Car loan', consumerLoan: 'Consumer loan', businessLoan: 'Business loan', creditCard: 'Credit card', familyLoan: 'Loan from family', otherDebt: 'Other debt',
   },
   flowCategories: {
-    salary: 'Salary', quarterBonus: 'Quarterly bonus', yearBonus: 'Year-end bonus', severancePay: 'One-off compensation', familyIncome: 'Family income', incomeOther: 'Other income',
+    salary: 'Monthly salary', familySalary: 'Family member’s salary', quarterBonus: 'Quarterly bonus', yearBonus: 'Year-end bonus', severancePay: 'One-off compensation', familyIncome: 'Family income', incomeOther: 'Other income',
     living: 'Living costs', rent: 'Rent', propertyFee: 'Property fee', carInsurance: 'Car insurance', premium: 'Insurance premium', subscription: 'Subscriptions', education: 'Education', expenseOther: 'Other expense',
   },
   frequency: { monthly: 'Monthly', quarterly: 'Quarterly', annual: 'Yearly', once: 'One-off' },

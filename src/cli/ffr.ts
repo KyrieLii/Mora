@@ -145,11 +145,11 @@ async function main() {
           group: group.id,
           kind: group.id === 'liability' ? 'liability' : 'asset',
           name: { zh: zh.groups[group.id], en: en.groups[group.id] },
-          categories: CATEGORIES.filter((entry) => entry.group === group.id).map((entry) => ({ id: entry.id, zh: zh.categories[entry.id], en: en.categories[entry.id], catchAll: !!entry.generic })),
+          categories: CATEGORIES.filter((entry) => entry.group === group.id && !entry.legacy).map((entry) => ({ id: entry.id, zh: zh.categories[entry.id], en: en.categories[entry.id], catchAll: !!entry.generic })),
         })),
         flows: (['income', 'expense'] as const).map((kind) => ({
           kind,
-          categories: FLOW_CATEGORIES.filter((entry) => entry.kind === kind).map((entry) => ({
+          categories: FLOW_CATEGORIES.filter((entry) => entry.kind === kind && !entry.legacy).map((entry) => ({
             id: entry.id,
             zh: zh.flowCategories[entry.id],
             en: en.flowCategories[entry.id],

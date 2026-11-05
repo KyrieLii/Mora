@@ -54,6 +54,15 @@ describe('summarize', () => {
     expect(result.savingsRate).toBeCloseTo(0.4)
   })
 
+  it('counts new and legacy wallet and deposit categories as cash', () => {
+    const items = ['wechatBalance', 'alipayBalance', 'wallet', 'deposit'].map((category) => ({
+      id: category, category, name: category, amount: 100, currency: 'CNY' as const,
+    }))
+    const result = summarize(snapshot({ items }))
+    expect(result.byGroup.cash).toBe(400)
+    expect(result.netWorth).toBe(400)
+  })
+
   it('files custom-named items under their group', () => {
     const s = snapshot({
       items: [

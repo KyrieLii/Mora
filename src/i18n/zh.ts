@@ -10,10 +10,10 @@ export const zh = {
     fixed: '房子、车位、车，按现在能卖的价格估',
     restricted: '公积金、养老金，算进净资产，不算进安全垫',
     other: '借出去的钱、公司股权等',
-    liability: '要还的钱：填剩余本金，展开可填每月还款',
+    liability: '要还的钱：填写每月还款和待还金额',
   } as Record<Group, string>,
   categories: {
-    checking: '银行存款', wallet: '微信支付宝余额', mmf: '货币基金', deposit: '定期存款', cashOther: '其他现金',
+    checking: '银行存款', wechatBalance: '微信零钱', alipayBalance: '支付宝余额', wallet: '微信支付宝余额', mmf: '货币基金', deposit: '定期存款', cashOther: '其他现金',
     stock: '股票', fund: '基金', bond: '债券理财', crypto: '加密资产', investOther: '其他投资',
     home: '自住房', rental: '投资房', parking: '车位', car: '车辆', fixedOther: '其他固定资产',
     hpf: '公积金', pension: '个人养老金', policy: '保单现金价值', restrictedOther: '其他受限资产',
@@ -21,7 +21,7 @@ export const zh = {
     mortgage: '房贷', carLoan: '车贷', consumerLoan: '消费贷', businessLoan: '经营贷', creditCard: '信用卡', familyLoan: '亲友借款', otherDebt: '其他负债',
   } as Record<string, string>,
   flowCategories: {
-    salary: '工资收入', quarterBonus: '季度奖金', yearBonus: '年终奖', severancePay: '一次性补偿', familyIncome: '家人收入', incomeOther: '其他收入',
+    salary: '月薪', familySalary: '月薪-家人', quarterBonus: '季度奖金', yearBonus: '年终奖', severancePay: '一次性补偿', familyIncome: '家人收入', incomeOther: '其他收入',
     living: '生活开销', rent: '房租', propertyFee: '物业费', carInsurance: '车险', premium: '保险保费', subscription: '订阅费', education: '教育支出', expenseOther: '其他支出',
   } as Record<string, string>,
   frequency: { monthly: '每月', quarterly: '每季', annual: '每年', once: '一次性' } as Record<Frequency, string>,

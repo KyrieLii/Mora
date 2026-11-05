@@ -8,5 +8,6 @@ import { zh, type Messages } from './zh'
 export function displayName(t: Messages, item: { id: string; name: string; category: string }, labels: 'categories' | 'flowCategories') {
   if (t.sampleNames[item.id]) return t.sampleNames[item.id]!
   const defaults = [zh[labels][item.category], en[labels][item.category]]
+  if (labels === 'flowCategories' && item.category === 'salary') defaults.push('工资收入', 'Salary')
   return defaults.includes(item.name) ? (t[labels][item.category] ?? item.name) : item.name
 }

@@ -21,7 +21,7 @@ const items: Item[] = [
 
 const flows: FlowItem[] = [
   { id: 'pay', category: 'salary', name: '我的工资', amount: 30000, currency: 'CNY', frequency: 'monthly' },
-  { id: 'partner', category: 'familyIncome', name: '配偶工资', amount: 15000, currency: 'CNY', frequency: 'monthly', continues: true },
+  { id: 'partner', category: 'familySalary', name: '配偶工资', amount: 15000, currency: 'CNY', frequency: 'monthly' },
   { id: 'severance', category: 'severancePay', name: '离职补偿（估）', amount: 60000, currency: 'CNY', frequency: 'once' },
   { id: 'living', category: 'living', name: '生活开销', amount: 13500, currency: 'CNY', frequency: 'monthly' },
   { id: 'car', category: 'carInsurance', name: '车险', amount: 6000, currency: 'CNY', frequency: 'annual' },

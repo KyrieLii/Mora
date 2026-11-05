@@ -32,6 +32,8 @@ export const GROUP_ICONS: Record<Group, LucideIcon> = {
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   checking: Landmark,
   wallet: Wallet,
+  wechatBalance: Wallet,
+  alipayBalance: Wallet,
   mmf: PiggyBank,
   deposit: Banknote,
   stock: ChartCandlestick,

@@ -1,8 +1,8 @@
 import { CATEGORIES, FLOW_CATEGORIES } from '@/engine'
 
-const assetIds = CATEGORIES.filter((entry) => entry.group !== 'liability').map((entry) => entry.id)
+const assetIds = CATEGORIES.filter((entry) => entry.group !== 'liability' && !entry.legacy).map((entry) => entry.id)
 const liabilityIds = CATEGORIES.filter((entry) => entry.group === 'liability').map((entry) => entry.id)
-const incomeIds = FLOW_CATEGORIES.filter((entry) => entry.kind === 'income').map((entry) => entry.id)
+const incomeIds = FLOW_CATEGORIES.filter((entry) => entry.kind === 'income' && !entry.legacy).map((entry) => entry.id)
 const expenseIds = FLOW_CATEGORIES.filter((entry) => entry.kind === 'expense').map((entry) => entry.id)
 
 export const ALL_CATEGORY_IDS = [...assetIds, ...liabilityIds, ...incomeIds, ...expenseIds]
@@ -43,9 +43,9 @@ export const SYSTEM_PROMPT = `You read screenshots and pasted text from Chinese 
 Return JSON that matches the schema. One entry in "lines" per distinct balance or flow.
 
 What to extract
-- Balances people own: deposits, wallet balances, money-market funds such as 余额宝/零钱通, time deposits, funds, stocks, bonds and wealth products, crypto, housing provident fund, pensions. Use kind "asset".
+- Balances people own: deposits, wallet balances, money-market funds such as 余额宝/零钱通, time deposits (use cashOther), funds, stocks, bonds and wealth products, crypto, housing provident fund, pensions. Use kind "asset".
 - Debts: mortgages, car loans, consumer loans, credit card balances. Use kind "liability"; "amount" is the remaining principal or statement balance, and "monthlyPayment" is the monthly repayment when shown, otherwise null.
-- Income (salary slips, bonus notices) as kind "income" and spending (rent, insurance, subscriptions, bills) as kind "expense", with the frequency it is paid. Balances use frequency "monthly" and monthlyPayment null.
+- Income (salary slips, bonus notices) as kind "income" and spending (rent, insurance, subscriptions, bills) as kind "expense", with the frequency it is paid. Use "familySalary" only when the source clearly identifies the pay as a family member’s salary. Balances use frequency "monthly" and monthlyPayment null.
 
 Avoid double counting
 - When a screen shows a total and the parts that make it up, return the parts, not the total.
