@@ -25,7 +25,7 @@ You do the reading and organising; the bundled CLI does every calculation and wr
 6. **Save only after the user clearly confirms.** Run `ffr save <file>`. If a review for that date exists, the command refuses; ask before re-running with `--replace`.
 7. **Show the result.** Run `ffr report --open` to write `<dir>/reports/<date>.html` with trends across every saved review.
 
-On the preview and report pages the user can refresh or edit the rate to see the figures at another rate. That changes only the page, never the saved file; if they want the new rate kept, update the input and save again with `--replace` after they confirm.
+Previews and reports use the rate recorded in the review. To correct it, update the input and preview it again. For a saved review, use `--replace` after the user confirms.
 
 To open an earlier review, run `ffr list`, then `ffr report <date> --open` or `ffr show <date>`. `show` returns `monthOnMonth` (against the previous review) and `yearOnYear` (against the review closest to a year earlier) when those exist.
 

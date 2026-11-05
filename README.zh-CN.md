@@ -40,7 +40,7 @@
 
 - 每次盘点存成一个 JSON 文件：`~/.family-finance-review/reviews/<日期>.json`。任何一次都能重新打开，也能做环比、同比。
 - 结果页是单个 HTML 文件，离线可用，不上传任何数据。
-- 命令行工具只有 `ffr fx` 会联网：Agent 用它从 api.frankfurter.dev 获取当天的美元兑人民币汇率。在结果页上也可以刷新或手动修改汇率，看换个汇率后的结果，已保存的盘点不会变。
+- 命令行工具只有 `ffr fx` 会联网：Agent 用它从 api.frankfurter.dev 获取当天的美元兑人民币汇率。预览和报告均使用盘点录入时的汇率。
 
 用 [`skills`](https://github.com/vercel-labs/skills) 命令行工具安装，它会识别 Claude Code、Codex 等 Agent，把 skill 复制到它们的 skills 目录：
 
