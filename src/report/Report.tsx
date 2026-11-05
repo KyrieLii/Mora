@@ -14,12 +14,12 @@ import type { ReportPayload } from './payload'
 const ignore = () => undefined
 
 /** The read-only lines behind the result, showing only groups that hold something. */
-function Details({ draft, previous }: { draft: Snapshot; previous?: Snapshot }) {
+function Details({ draft, previous, defaultOpen }: { draft: Snapshot; previous?: Snapshot; defaultOpen?: boolean }) {
   const { t } = useI18n()
   const groups = GROUPS.filter((group) => draft.items.some((item) => CATEGORIES.find((entry) => entry.id === item.category)?.group === group.id))
   const hasFlow = (kind: 'income' | 'expense') => (draft.flows ?? []).some((flow) => FLOW_CATEGORIES.find((entry) => entry.id === flow.category)?.kind === kind)
   return (
-    <Disclosure title={t.standalone.details}>
+    <Disclosure title={t.standalone.details} defaultOpen={defaultOpen}>
       <div className="grid gap-4">
         {groups.map((group) => (
           <GroupSheet key={group.id} group={group.id} draft={draft} previous={previous} readOnly onDraft={ignore} />
@@ -64,7 +64,7 @@ export function Report({ payload }: { payload: ReportPayload }) {
         <main className="grid content-start gap-6">
           {header}
           {notice}
-          <Details draft={draft} previous={previous} />
+          <Details draft={draft} previous={previous} defaultOpen />
         </main>
         <aside className="grid content-start gap-6 pb-8">
           <ResultContent draft={draft} previous={previous} history={history} />
