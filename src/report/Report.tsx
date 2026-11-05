@@ -36,7 +36,7 @@ function Details({ draft, previous, defaultOpen }: { draft: Snapshot; previous?:
   )
 }
 
-function PreviewNotice() {
+function PreviewNotice({ wide }: { wide: boolean }) {
   const { t } = useI18n()
   return (
     <p role="status" className="grid gap-1 rounded-2xl bg-caution/14 px-4 py-3">
@@ -44,7 +44,7 @@ function PreviewNotice() {
         <Eye className="size-4.5" aria-hidden="true" />
         {t.standalone.preview}
       </span>
-      <span className="text-[14px] leading-relaxed text-muted-foreground">{t.standalone.previewNote}</span>
+      <span className="text-[14px] leading-relaxed text-muted-foreground">{wide ? t.standalone.previewNote : t.standalone.previewNoteMobile}</span>
     </p>
   )
 }
@@ -56,7 +56,7 @@ export function Report({ payload }: { payload: ReportPayload }) {
   const history = payload.snapshots.slice(0, -1)
   const previous = history.at(-1)
   const header = <Header draft={draft} title={periodName(draft)} />
-  const notice = payload.mode === 'preview' && <PreviewNotice />
+  const notice = payload.mode === 'preview' && <PreviewNotice wide={wide} />
 
   if (wide) {
     return (

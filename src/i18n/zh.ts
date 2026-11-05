@@ -176,6 +176,7 @@ export const zh = {
   standalone: {
     preview: '预览 · 尚未保存',
     previewNote: '核对下面的明细和结果。没有问题，就在对话里让 Agent 保存；需要修改，也直接告诉它。',
+    previewNoteMobile: '展开下方的「明细」核对各项金额，并检查盘点结果。确认无误后，在对话里让 Agent 保存。需要修改时，直接告诉它。',
     details: '明细',
   },
 

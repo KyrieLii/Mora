@@ -175,6 +175,7 @@ export const en: Messages = {
   standalone: {
     preview: 'Preview · not saved yet',
     previewNote: 'Check the lines and results below. If they look right, ask your agent to save them; if not, tell it what to change.',
+    previewNoteMobile: 'Expand Details below to check the figures, then review the results. Ask your agent to save the review once everything looks right, or tell it what to change.',
     details: 'Details',
   },
 
