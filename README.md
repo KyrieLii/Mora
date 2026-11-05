@@ -4,11 +4,21 @@ English | [简体中文](README.zh-CN.md)
 
 **Try it: [Mora](https://family-finance-review.vercel.app/)** · [sample results](https://family-finance-review.vercel.app/#example)
 
-A quick, private balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if all income stopped.
+A local-first balance-sheet check-up for households. Every quarter or year, update what you own, what you owe and what comes in and goes out, then see your net worth, how it has changed, and how many months your savings would last if all income stopped. Your figures stay on your own device.
 
-The interface is available in Simplified Chinese and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm.
+The interface is available in Simplified Chinese and English and is built for urban Chinese households, where property, mortgages, the housing provident fund and mixed RMB/USD holdings are the norm. It is a prototype.
 
-> Prototype. All data stays in your browser's local storage and no account is needed. If you use the screenshot import, the images or text you choose go straight from your browser to the AI provider you set up, never to a server of ours; your API key is stored only in your browser. Tapping refresh next to the exchange rate fetches the ECB reference rate from api.frankfurter.dev, which sees your IP address but nothing you entered.
+## Local-first
+
+Mora has no backend. Your figures are not sent anywhere unless you choose a feature that needs the network.
+
+- **No account, no server.** The web app keeps everything in your browser's local storage. There is no database, no sign-in and no analytics. Fonts and icons are bundled, so a hosted copy only serves static files.
+- **Plain files on your computer.** With the Agent Skill, each review is a JSON file in `~/.mora`, and each result page is a single HTML file that works offline. You can read, back up or delete them like any other file.
+- **The network is used only when you ask:**
+  - *Screenshot import* sends only the images or text you pick, straight from your browser to the AI provider you set up, with your own API key. The key is stored only in your browser.
+  - *Refreshing the exchange rate* (in the web app, or `mora fx`) asks api.frankfurter.dev for the ECB reference rate. That site sees your IP address, but nothing you entered.
+  - With the skill, your agent and its model provider see the material you give the agent. The CLI itself does every calculation offline.
+- **Nothing is kept elsewhere.** Clearing your browser's site data deletes the web app's reviews, and there is no copy to restore them from.
 
 <p align="center">
   <img src="docs/screenshots/desktop-en.png" width="62%" alt="Sample results on desktop: net worth, the safety cushion, and the asset and liability breakdown" />
@@ -39,8 +49,7 @@ It is not a budgeting app and does not connect to banks. It is a snapshot you up
 `skills/mora/` is an [Agent Skill](https://agentskills.io) for people who already work with an AI agent such as Claude Code or Codex. The agent reads your screenshots and statements, writes the review as JSON, and runs the bundled CLI (`scripts/mora.mjs`, Node 20+, no dependencies), which does every calculation with the same engine as the web app. You check an HTML preview, confirm in chat, and only then is the review saved.
 
 - Each review is saved as one JSON file, `~/.mora/reviews/<date>.json`, so any review can be reopened and compared month on month or year on year. The CLI looks for an existing review folder if `~/.mora` does not exist.
-- Result pages are single, self-contained HTML files that work offline. Nothing is uploaded.
-- The CLI works offline except `mora fx`, which the agent runs to get the day's USD/CNY rate from api.frankfurter.dev. Previews and reports use the rate recorded in the review.
+- Every command except `mora fx` works offline. Previews and reports use the rate recorded in the review.
 
 To install it with the [`skills`](https://github.com/vercel-labs/skills) CLI, which detects Claude Code, Codex and other agents and copies the skill into their skills folders:
 
